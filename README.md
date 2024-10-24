@@ -163,4 +163,5 @@ forthcoming.
 
 ## Contributing
 
-Interested in improving GreenHEART? Please see the [Contributing](./CONTRIBUTING.md) section for more information.
+Interested in improving GreenHEART? Please see the [Contributor's Guide](./docs/CONTRIBUTING.md)
+section for more information.

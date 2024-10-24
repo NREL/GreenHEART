@@ -95,10 +95,9 @@ develop = [
     "pytest",
     "pytest-subtests",
     "responses",
-    "sphinx",
-    "sphinx-rtd-theme",
-    "sphinx-copybutton",
     "Plotly",
+    "jupyter-book",
+    "sphinxcontrib-napoleon"
 ]
 examples = ["jupyterlab"]
 all = ["greenheart[develop,examples]"]
