@@ -1,7 +1,7 @@
 site: #!include flatirons_site.yaml
   data:
-    lat: 47.5233
-    lon: -92.5366
+    lat: 34.872
+    lon: -100.972
     elev: 1099
     year: 2013
     tz: -6
@@ -22,7 +22,7 @@ site: #!include flatirons_site.yaml
   grid_resource_file: ""
   hub_height: 115.0
   capacity_hours: []
-  solar: true
+  solar: false
   wind: true
   wave: false
   wind_resource_origin: "WTK"
@@ -30,7 +30,7 @@ site: #!include flatirons_site.yaml
 
 technologies:
   wind:
-    num_turbines: 216
+    num_turbines: 120
     turbine_rating_kw: 6000.0
     model_name: floris
     timestep: [0, 8760]
@@ -48,7 +48,7 @@ technologies:
     initial_SOC: 90.0
     fin_model: !include default_fin_config.yaml
   grid:
-    interconnect_kw: 2000000 # Set higher than rated generation capacity
+    interconnect_kw: 720000 # Set higher than rated generation capacity
     fin_model: !include default_fin_config.yaml
 
 config:
