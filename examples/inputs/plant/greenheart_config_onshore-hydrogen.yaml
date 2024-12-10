@@ -210,6 +210,16 @@ plant_design:
     pv_location: "platform" # can be one of ["none", "onshore", "platform"]
     battery_location: "platform" # can be one of ["none", "onshore", "platform"]
 
+lca_config:
+  run_lca: False #True
+  electrolyzer_type: pem #alkaline, soec
+  feedstock_water_type: ground #desal, surface
+  cambium: #cambium API argument, see cambium_data.py for additional argument options
+    project_uuid: '0f92fe57-3365-428a-8fe8-0afc326b3b43'
+    scenario: 'Mid-case with 100% decarbonization by 2035'
+    location_type: 'GEA Regions 2023'
+    time_type: 'hourly'
+
 opt_options:
   opt_flag: True
   general: 

@@ -694,6 +694,7 @@ def run_simulation(config: GreenHeartSimulationConfig):
 
         total_accessory_power_renewable_kw = np.zeros(len(electrolyzer_energy_consumption_bop_kw))
         total_accessory_power_renewable_kw += electrolyzer_energy_consumption_bop_kw
+        total_accessory_power_grid_kw = np.zeros(len(electrolyzer_energy_consumption_bop_kw))
         # if transport is not HVDC and h2 storage is on shore, then power the storage from the grid
         if (design_scenario["transportation"] == "pipeline") and (
             design_scenario["h2_storage_location"] == "onshore"
@@ -701,12 +702,12 @@ def run_simulation(config: GreenHeartSimulationConfig):
             total_accessory_power_renewable_kw += (
                 desal_power_kw + h2_transport_compressor_power_kw
             )
-            total_accessory_power_grid_kw = h2_storage_power_kw
+            total_accessory_power_grid_kw += h2_storage_power_kw
         else:
             total_accessory_power_renewable_kw += (
                 desal_power_kw + h2_transport_compressor_power_kw + h2_storage_power_kw
             )
-            total_accessory_power_grid_kw = 0.0
+            # total_accessory_power_grid_kw = 0.0
 
         ### subtract peripheral power from supply to get what is left for electrolyzer and also get grid power
         remaining_power_profile = np.zeros_like(
@@ -1045,6 +1046,8 @@ def run_simulation(config: GreenHeartSimulationConfig):
                 config.orbit_config,
                 config.turbine_config,
                 h2_storage_results,
+                total_accessory_power_renewable_kw,
+                total_accessory_power_grid_kw,
                 capex_breakdown,
                 opex_breakdown_annual,
                 wind_cost_results,
