@@ -3,21 +3,21 @@ greenheart.simulation.technologies.ammonia
 
 .. automodule:: greenheart.simulation.technologies.ammonia
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28,4 +28,3 @@ greenheart.simulation.technologies.ammonia
    :recursive:
 
    greenheart.simulation.technologies.ammonia.ammonia
-

@@ -3,28 +3,15 @@ greenheart.simulation.technologies.hydrogen.electrolysis.pem\_mass\_and\_footpri
 
 .. automodule:: greenheart.simulation.technologies.hydrogen.electrolysis.pem_mass_and_footprint
 
-   
-   
-   
 
-   
-   
+
+
+
+
+
    .. rubric:: Functions
 
    .. autosummary::
-   
+
       footprint
       mass
-   
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

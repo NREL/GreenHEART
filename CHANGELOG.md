@@ -4,6 +4,8 @@
 
 - add `CoolProp` to `pyproject.toml`
 - change units of `lcoe_real` in `HOPPComponent` from "MW*h" to "kW*h"
+- Adds `pre-commit`, `ruff`, and `isort` checks, and CI workflow to ensure these steps aren't
+  skipped.
 
 ## v0.1.3 [1 November 2024]
 

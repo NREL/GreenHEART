@@ -5,9 +5,10 @@ This file is based on the WISDEM file of the same name: https://github.com/WISDE
 import os
 import sys
 
+
 try:
     from mpi4py import MPI
-except:
+except ModuleNotFoundError:
     MPI = False
 
 
@@ -31,9 +32,10 @@ if under_mpirun():
     from mpi4py import MPI
 
     def debug(*msg):  # pragma: no cover
-        newmsg = ["%d: " % MPI.COMM_WORLD.rank] + list(msg)
+        newmsg = [f"{MPI.COMM_WORLD.rank}: "]
+        newmsg.extend(list(msg))
         for m in newmsg:
-            sys.stdout.write("%s " % m)
+            sys.stdout.write(f"{m} ")
         sys.stdout.write("\n")
         sys.stdout.flush()
 
@@ -47,11 +49,11 @@ def map_comm_heirarchical(n_DV, n_OF, openmp=False):
     equal to the number of design variables (x2 if central finite differencing is used), each
     with its associated number of openfast simulations.
     When openmp flag is turned on, the code spreads the openfast simulations across nodes to
-    lavereage the opnemp parallelization of OpenFAST. The cores that will run under openmp, are marked
-    in the color map as 1000000. The ones handling python and the DV are marked as 0, and
+    lavereage the opnemp parallelization of OpenFAST. The cores that will run under openmp, are
+    marked in the color map as 1000000. The ones handling python and the DV are marked as 0, and
     finally the master ones for each openfast run are marked with a 1.
     """
-    if openmp == True:
+    if openmp is True:
         n_procs_per_node = 36  # Number of
         num_procs = MPI.COMM_WORLD.Get_size()
         n_nodes = num_procs / n_procs_per_node
@@ -66,19 +68,20 @@ def map_comm_heirarchical(n_DV, n_OF, openmp=False):
         for nn in range(int(n_nodes)):
             for n_dv in range(int(n_DV_per_node)):
                 comm_map_down[nn * n_procs_per_node + n_dv] = [
-                    int(n_DV_per_node) + n_dv * n_OF + nn * (n_procs_per_node) + j for j in range(n_OF)
+                    int(n_DV_per_node) + n_dv * n_OF + nn * (n_procs_per_node) + j
+                    for j in range(n_OF)
                 ]
 
                 # This core handles python, so in the colormap the entry is 0
-                color_map[nn * n_procs_per_node + n_dv] = int(0)
+                color_map[nn * n_procs_per_node + n_dv] = 0
                 # These cores handles openfast, so in the colormap the entry is 1
                 for k in comm_map_down[nn * n_procs_per_node + n_dv]:
-                    color_map[k] = int(1)
+                    color_map[k] = 1
 
                 for j in comm_map_down[nn * n_procs_per_node + n_dv]:
                     comm_map_up[j] = nn * n_procs_per_node + n_dv
     else:
-        N = n_DV + n_DV * n_OF
+        n_DV + n_DV * n_OF
         comm_map_down = {}
         comm_map_up = {}
         color_map = [0] * n_DV
@@ -113,9 +116,9 @@ def subprocessor_loop(comm_map_up):
     rank_target = comm_map_up[rank]
 
     keep_running = True
-    while keep_running == True:
+    while keep_running is True:
         data = MPI.COMM_WORLD.recv(source=(rank_target), tag=0)
-        if data[0] == False:
+        if data[0] is False:
             break
         else:
             func_execution = data[0]

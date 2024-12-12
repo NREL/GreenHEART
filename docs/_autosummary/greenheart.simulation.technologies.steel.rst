@@ -3,21 +3,21 @@ greenheart.simulation.technologies.steel
 
 .. automodule:: greenheart.simulation.technologies.steel
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28,4 +28,3 @@ greenheart.simulation.technologies.steel
    :recursive:
 
    greenheart.simulation.technologies.steel.steel
-

@@ -4,13 +4,13 @@ site: #!include flatirons_site.yaml
     lon: -96.9516
     elev: 0
     year: 2013
-    site_boundaries: 
-      verts:  
+    site_boundaries:
+      verts:
         - [0.0, 0.0]
         - [0.0, 2000.0]
         - [2000.0, 2000.0]
-        - [2000.0, 0.0] 
-      verts_simple: 
+        - [2000.0, 0.0]
+      verts_simple:
         - [0.0, 0.0]
         - [0.0, 2000.0]
         - [2000.0, 2000.0]
@@ -25,7 +25,7 @@ site: #!include flatirons_site.yaml
   wind: true
   wave: true
   wind_resource_origin: "WTK"
-  
+
 technologies:
   wind:
     num_turbines: 10

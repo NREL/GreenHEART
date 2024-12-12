@@ -1,12 +1,13 @@
 # general imports
 from pathlib import Path
 
+# ORBIT imports
+from ORBIT.core.library import initialize_library
+
 # GreenHEART imports
 from greenheart.simulation.greenheart_simulation import GreenHeartSimulationConfig
 from greenheart.tools.optimization.gc_run_greenheart import run_greenheart
 
-# ORBIT imports
-from ORBIT.core.library import initialize_library
 
 DATA_PATH = Path(__file__).parent / "input"
 initialize_library(DATA_PATH)
@@ -42,7 +43,7 @@ if __name__ == "__main__":
 
     # for optimization
     # prob, config = run_greenheart(config, run_only=False)
-    
+
     lcoe = prob.get_val("lcoe", units="USD/(MW*h)")
     lcoh = prob.get_val("lcoh", units="USD/kg")
 

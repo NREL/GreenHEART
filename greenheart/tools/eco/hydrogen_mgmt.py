@@ -1,40 +1,12 @@
+import copy
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
-import copy
+from ORBIT import ProjectManager
 
-from ORBIT import ProjectManager, load_config
-from ORBIT.core import Vessel
-from ORBIT.core.library import initialize_library
-from ORBIT.phases.design import DesignPhase
-from ORBIT.phases.install import InstallPhase
-
-from greenheart.simulation.technologies.hydrogen.h2_transport.h2_compression import (
-    Compressor,
-)
-from greenheart.simulation.technologies.hydrogen.h2_storage.pressure_vessel.compressed_gas_storage_model_20221021.Compressed_all import (
-    PressureVessel,
-)
-from greenheart.simulation.technologies.hydrogen.h2_storage.pipe_storage import (
-    UndergroundPipeStorage,
-)
-
-from greenheart.simulation.technologies.hydrogen.h2_storage.lined_rock_cavern.lined_rock_cavern import (
-    LinedRockCavernStorage,
-)
-from greenheart.simulation.technologies.hydrogen.h2_storage.salt_cavern.salt_cavern import (
-    SaltCavernStorage,
-)
-from greenheart.simulation.technologies.hydrogen.h2_storage.on_turbine.on_turbine_hydrogen_storage import (
-    PressurizedTower,
-)
-
-from greenheart.simulation.technologies.hydrogen.h2_transport.h2_export_pipe import (
-    run_pipe_analysis,
-)
-from greenheart.simulation.technologies.hydrogen.h2_transport.h2_pipe_array import (
-    run_pipe_array_const_diam,
-)
+# TODO: fix import structure in future refactor
+from greenheart.simulation.technologies.offshore.all_platforms import calc_platform_opex
 from greenheart.simulation.technologies.offshore.fixed_platform import (
     FixedPlatformDesign,
     FixedPlatformInstallation,
@@ -43,11 +15,17 @@ from greenheart.simulation.technologies.offshore.floating_platform import (
     FloatingPlatformDesign,
     FloatingPlatformInstallation,
 )
-from greenheart.simulation.technologies.offshore.all_platforms import calc_platform_opex
+from greenheart.simulation.technologies.hydrogen.h2_transport.h2_compression import Compressor
 
-from greenheart.simulation.technologies.hydrogen.h2_storage.storage_sizing import (
-    hydrogen_storage_capacity,
-)
+
+from greenheart.simulation.technologies.hydrogen.h2_storage.pipe_storage import UndergroundPipeStorage  # noqa: E501  # fmt: skip  # isort:skip
+from greenheart.simulation.technologies.hydrogen.h2_storage.storage_sizing import hydrogen_storage_capacity  # noqa: E501  # fmt: skip  # isort:skip
+from greenheart.simulation.technologies.hydrogen.h2_transport.h2_pipe_array import run_pipe_array_const_diam  # noqa: E501  # fmt: skip  # isort:skip
+from greenheart.simulation.technologies.hydrogen.h2_transport.h2_export_pipe import run_pipe_analysis  # noqa: E501  # fmt: skip  # isort:skip
+from greenheart.simulation.technologies.hydrogen.h2_storage.salt_cavern.salt_cavern import SaltCavernStorage  # noqa: E501  # fmt: skip  # isort:skip
+from greenheart.simulation.technologies.hydrogen.h2_storage.lined_rock_cavern.lined_rock_cavern import LinedRockCavernStorage  # noqa: E501  # fmt: skip  # isort:skip
+from greenheart.simulation.technologies.hydrogen.h2_storage.on_turbine.on_turbine_hydrogen_storage import PressurizedTower  # noqa: E501  # fmt: skip  # isort:skip
+from greenheart.simulation.technologies.hydrogen.h2_storage.pressure_vessel.compressed_gas_storage_model_20221021.Compressed_all import PressureVessel  # noqa: E501  # fmt: skip  # isort:skip
 
 
 def run_h2_pipe_array(
@@ -69,9 +47,7 @@ def run_h2_pipe_array(
                 "ArraySystemDesign"
             ].sections_distance
 
-        if (
-            design_scenario["wind_location"] == "onshore"
-        ):  # TODO: improve pipe length estimate
+        if design_scenario["wind_location"] == "onshore":  # TODO: improve pipe length estimate
             raise NotImplementedError(
                 "distributed electrolysis is not implemented for onshore wind."
             )
@@ -81,26 +57,18 @@ def run_h2_pipe_array(
             # )
 
         turbine_h2_flowrate = (
-            max(
-                electrolyzer_physics_results["H2_Results"][
-                    "Hydrogen Hourly Production [kg/hr]"
-                ]
-            )
+            max(electrolyzer_physics_results["H2_Results"]["Hydrogen Hourly Production [kg/hr]"])
             * ((1.0 / 60.0) ** 2)
             / hopp_config["technologies"]["wind"]["num_turbines"]
         )
         m_dot = (
             np.ones_like(pipe_lengths) * turbine_h2_flowrate
         )  # Mass flow rate [kg/s] assuming 300 MW -> 1.5 kg/s
-        p_inlet = (
-            31  # Inlet pressure [bar] - assumed outlet pressure from electrolyzer model
-        )
+        p_inlet = 31  # Inlet pressure [bar] - assumed outlet pressure from electrolyzer model
         p_outlet = 10  # Outlet pressure [bar] - about 20 bar drop
         depth = greenheart_config["site"]["depth"]  # depth of pipe [m]
 
-        capex, opex = run_pipe_array_const_diam(
-            pipe_lengths, depth, p_inlet, p_outlet, m_dot
-        )
+        capex, opex = run_pipe_array_const_diam(pipe_lengths, depth, p_inlet, p_outlet, m_dot)
 
         h2_pipe_array_results = {"capex": capex, "opex": opex}
     else:
@@ -122,15 +90,11 @@ def run_h2_transport_compressor(
     ):
         ########## compressor model from Jamie Kee based on HDSAM
         flow_rate_kg_per_hr = max(
-            electrolyzer_physics_results["H2_Results"][
-                "Hydrogen Hourly Production [kg/hr]"
-            ]
+            electrolyzer_physics_results["H2_Results"]["Hydrogen Hourly Production [kg/hr]"]
         )  # kg/hr
         number_of_compressors = 2  # a third will be added as backup in the code
         p_inlet = 20  # bar
-        p_outlet = greenheart_config["h2_transport_compressor"][
-            "outlet_pressure"
-        ]  # bar
+        p_outlet = greenheart_config["h2_transport_compressor"]["outlet_pressure"]  # bar
         flow_rate_kg_d = flow_rate_kg_per_hr * 24.0
 
         compressor = Compressor(
@@ -191,15 +155,11 @@ def run_h2_transport_pipe(
     export_pipe_length = orbit_config["site"]["distance_to_landfall"]  # Length [km]
     mass_flow_rate = max(
         electrolyzer_physics_results["H2_Results"]["Hydrogen Hourly Production [kg/hr]"]
-    ) * (
-        (1.0 / 60.0) ** 2
-    )  # from [kg/hr] to mass flow rate in [kg/s] assuming 300 MW -> 1.5 kg/s
+    ) * ((1.0 / 60.0) ** 2)  # from [kg/hr] to mass flow rate in [kg/s] assuming 300 MW -> 1.5 kg/s
     p_inlet = greenheart_config["h2_transport_compressor"][
         "outlet_pressure"
     ]  # Inlet pressure [bar]
-    p_outlet = greenheart_config["h2_transport_pipe"][
-        "outlet_pressure"
-    ]  # Outlet pressure [bar]
+    p_outlet = greenheart_config["h2_transport_pipe"]["outlet_pressure"]  # Outlet pressure [bar]
     depth = greenheart_config["site"]["depth"]  # depth of pipe [m]
 
     # run model
@@ -251,15 +211,12 @@ def run_h2_storage(
     design_scenario,
     verbose=False,
 ):
-
     if design_scenario["h2_storage_location"] == "platform":
         if (
             greenheart_config["h2_storage"]["type"] != "pressure_vessel"
             and greenheart_config["h2_storage"]["type"] != "none"
         ):
-            raise ValueError(
-                "Only pressure vessel storage can be used on the off shore platform"
-            )
+            raise ValueError("Only pressure vessel storage can be used on the off shore platform")
 
     if design_scenario["h2_storage_location"] == "turbine":
         if (
@@ -267,11 +224,13 @@ def run_h2_storage(
             and greenheart_config["h2_storage"]["type"] != "pressure_vessel"
             and greenheart_config["h2_storage"]["type"] != "none"
         ):
-            raise ValueError(
-                "Only turbine or pressure vessel storage can be used for turbine hydrogen storage location"
+            msg = (
+                "Only turbine or pressure vessel storage can be used for turbine hydrogen"
+                " storage location"
             )
+            raise ValueError(msg)
     ########### initialize output dictionary ###########
-    h2_storage_results = dict()
+    h2_storage_results = {}
 
     storage_max_fill_rate = np.max(
         electrolyzer_physics_results["H2_Results"]["Hydrogen Hourly Production [kg/hr]"]
@@ -292,9 +251,7 @@ def run_h2_storage(
             "section_heights": turbine_config["tower"]["section_heights"],
         }
 
-        h2_storage = PressurizedTower(
-            greenheart_config["project_parameters"]["atb_year"], turbine
-        )
+        h2_storage = PressurizedTower(greenheart_config["project_parameters"]["atb_year"], turbine)
         h2_storage.run()
 
         h2_storage_capacity_single_turbine = h2_storage.get_capacity_H2()  # kg
@@ -304,9 +261,7 @@ def run_h2_storage(
     ##################### get storage capacity from hydrogen storage demand
     elif greenheart_config["h2_storage"]["size_capacity_from_demand"]["flag"]:
         hydrogen_storage_demand = np.mean(
-            electrolyzer_physics_results["H2_Results"][
-                "Hydrogen Hourly Production [kg/hr]"
-            ]
+            electrolyzer_physics_results["H2_Results"]["Hydrogen Hourly Production [kg/hr]"]
         )  # TODO: update demand based on end-use needs
         (
             hydrogen_storage_capacity_kg,
@@ -318,9 +273,7 @@ def run_h2_storage(
             hydrogen_storage_demand,
         )
         h2_storage_capacity_kg = hydrogen_storage_capacity_kg
-        h2_storage_results["hydrogen_storage_duration_hr"] = (
-            hydrogen_storage_duration_hr
-        )
+        h2_storage_results["hydrogen_storage_duration_hr"] = hydrogen_storage_duration_hr
         h2_storage_results["hydrogen_storage_soc"] = hydrogen_storage_soc
 
     ##################### get storage capacity based on storage days in config
@@ -361,9 +314,7 @@ def run_h2_storage(
             if verbose:
                 print("On-turbine H2 storage:")
                 print("mass empty (single turbine): ", h2_storage.get_mass_empty())
-                print(
-                    "H2 capacity (kg) - single turbine: ", h2_storage.get_capacity_H2()
-                )
+                print("H2 capacity (kg) - single turbine: ", h2_storage.get_capacity_H2())
                 print("storage pressure: ", h2_storage.get_pressure_H2())
 
             h2_storage_results["storage_energy"] = (
@@ -371,19 +322,20 @@ def run_h2_storage(
             )
         else:
             raise ValueError(
-                "`h2_storage_location` must be set to 'turbine' to use 'turbine' for h2 storage type."
+                "`h2_storage_location` must be set to 'turbine' to use 'turbine' for h2"
+                " storage type."
             )
 
     elif greenheart_config["h2_storage"]["type"] == "pipe":
         # for more information, see https://www.nrel.gov/docs/fy14osti/58564.pdf
         # initialize dictionary for pipe storage parameters
-        storage_input = dict()
+        storage_input = {}
 
         # pull parameters from plat_config file
         storage_input["h2_storage_kg"] = h2_storage_capacity_kg
-        storage_input["compressor_output_pressure"] = greenheart_config[
-            "h2_storage_compressor"
-        ]["output_pressure"]
+        storage_input["compressor_output_pressure"] = greenheart_config["h2_storage_compressor"][
+            "output_pressure"
+        ]
         storage_input["system_flow_rate"] = storage_max_fill_rate
         storage_input["model"] = "papadias"
 
@@ -393,9 +345,7 @@ def run_h2_storage(
         h2_storage.pipe_storage_capex()
         h2_storage.pipe_storage_opex()
 
-        h2_storage_results["storage_capex"] = h2_storage.output_dict[
-            "pipe_storage_capex"
-        ]
+        h2_storage_results["storage_capex"] = h2_storage.output_dict["pipe_storage_capex"]
         h2_storage_results["storage_opex"] = h2_storage.output_dict["pipe_storage_opex"]
         h2_storage_results["storage_energy"] = 0.0
 
@@ -421,23 +371,16 @@ def run_h2_storage(
             h2_storage_results["storage_opex"] = opex_dist_total
             h2_storage_results["storage_energy"] = (
                 energy
-                * electrolyzer_physics_results["H2_Results"][
-                    "Life: Annual H2 production [kg/year]"
-                ]
+                * electrolyzer_physics_results["H2_Results"]["Life: Annual H2 production [kg/year]"]
             )  # total in kWh
             h2_storage_results["tank_mass_full_kg"] = (
-                h2_storage.get_tank_mass(h2_storage_capacity_kg)[1]
-                + h2_storage_capacity_kg
+                h2_storage.get_tank_mass(h2_storage_capacity_kg)[1] + h2_storage_capacity_kg
             )
             h2_storage_results["tank_footprint_m2"] = h2_storage.get_tank_footprint(
                 h2_storage_capacity_kg, upright=True
             )[1]
-            h2_storage_results["tank volume (m^3)"] = (
-                h2_storage.compressed_gas_function.Vtank
-            )
-            h2_storage_results["Number of tanks"] = h2_storage.get_tanks(
-                h2_storage_capacity_kg
-            )
+            h2_storage_results["tank volume (m^3)"] = h2_storage.compressed_gas_function.Vtank
+            h2_storage_results["Number of tanks"] = h2_storage.get_tanks(h2_storage_capacity_kg)
             if verbose:
                 print("ENERGY FOR STORAGE: ", energy * 1e-3 / (365 * 24), " MW")
                 print("Tank volume (M^3): ", h2_storage_results["tank volume (m^3)"])
@@ -463,20 +406,15 @@ def run_h2_storage(
             h2_storage_results["storage_opex"] = opex
             h2_storage_results["storage_energy"] = (
                 energy
-                * electrolyzer_physics_results["H2_Results"][
-                    "Life: Annual H2 production [kg/year]"
-                ]
+                * electrolyzer_physics_results["H2_Results"]["Life: Annual H2 production [kg/year]"]
             )  # total in kWh
             h2_storage_results["tank_mass_full_kg"] = (
-                h2_storage.get_tank_mass(h2_storage_capacity_kg)[1]
-                + h2_storage_capacity_kg
+                h2_storage.get_tank_mass(h2_storage_capacity_kg)[1] + h2_storage_capacity_kg
             )
             h2_storage_results["tank_footprint_m2"] = h2_storage.get_tank_footprint(
                 h2_storage_capacity_kg, upright=True
             )[1]
-            h2_storage_results["tank volume (m^3)"] = (
-                h2_storage.compressed_gas_function.Vtank
-            )
+            h2_storage_results["tank volume (m^3)"] = h2_storage.compressed_gas_function.Vtank
             h2_storage_results["Number of tanks"] = (
                 h2_storage.compressed_gas_function.number_of_tanks
             )
@@ -491,7 +429,7 @@ def run_h2_storage(
 
     elif greenheart_config["h2_storage"]["type"] == "salt_cavern":
         # initialize dictionary for salt cavern storage parameters
-        storage_input = dict()
+        storage_input = {}
 
         # pull parameters from plant_config file
         storage_input["h2_storage_kg"] = h2_storage_capacity_kg
@@ -504,17 +442,13 @@ def run_h2_storage(
         h2_storage.salt_cavern_capex()
         h2_storage.salt_cavern_opex()
 
-        h2_storage_results["storage_capex"] = h2_storage.output_dict[
-            "salt_cavern_storage_capex"
-        ]
-        h2_storage_results["storage_opex"] = h2_storage.output_dict[
-            "salt_cavern_storage_opex"
-        ]
+        h2_storage_results["storage_capex"] = h2_storage.output_dict["salt_cavern_storage_capex"]
+        h2_storage_results["storage_opex"] = h2_storage.output_dict["salt_cavern_storage_opex"]
         h2_storage_results["storage_energy"] = 0.0
 
     elif greenheart_config["h2_storage"]["type"] == "lined_rock_cavern":
         # initialize dictionary for salt cavern storage parameters
-        storage_input = dict()
+        storage_input = {}
 
         # pull parameters from plat_config file
         storage_input["h2_storage_kg"] = h2_storage_capacity_kg
@@ -535,20 +469,16 @@ def run_h2_storage(
         ]
         h2_storage_results["storage_energy"] = 0.0
     else:
-        raise (
-            ValueError(
-                "H2 storage type %s was given, but must be one of ['none', 'turbine', 'pipe', 'pressure_vessel', 'salt_cavern', 'lined_rock_cavern']"
-            )
+        msg = (
+            "H2 storage type %s was given, but must be one of ['none', 'turbine', 'pipe',"
+            " 'pressure_vessel', 'salt_cavern', 'lined_rock_cavern']"
         )
+        raise ValueError(msg)
 
     if verbose:
         print("\nH2 Storage Results:")
-        print("H2 storage capex: ${0:,.0f}".format(h2_storage_results["storage_capex"]))
-        print(
-            "H2 storage annual opex: ${0:,.0f}/yr".format(
-                h2_storage_results["storage_opex"]
-            )
-        )
+        print("H2 storage capex: ${:,.0f}".format(h2_storage_results["storage_capex"]))
+        print("H2 storage annual opex: ${:,.0f}/yr".format(h2_storage_results["storage_opex"]))
         print(
             "H2 storage capacity (tonnes): ",
             h2_storage_results["h2_storage_capacity_kg"] / 1000,
@@ -556,8 +486,7 @@ def run_h2_storage(
         if h2_storage_results["h2_storage_capacity_kg"] > 0:
             print(
                 "H2 storage cost $/kg of H2: ",
-                h2_storage_results["storage_capex"]
-                / h2_storage_results["h2_storage_capacity_kg"],
+                h2_storage_results["storage_capex"] / h2_storage_results["h2_storage_capacity_kg"],
             )
 
     return h2_storage, h2_storage_results
@@ -587,9 +516,7 @@ def run_equipment_platform(
         "equipment_footprint_m2": desal_size_m2"""
 
         if design_scenario["electrolyzer_location"] == "platform":
-            topmass += (
-                electrolyzer_physics_results["equipment_mass_kg"] * 1e-3
-            )  # from kg to tonnes
+            topmass += electrolyzer_physics_results["equipment_mass_kg"] * 1e-3  # from kg to tonnes
             topmass += desal_results["equipment_mass_kg"] * 1e-3  # from kg to tonnes
             toparea += electrolyzer_physics_results["equipment_footprint_m2"]
             toparea += desal_results["equipment_footprint_m2"]
@@ -598,9 +525,7 @@ def run_equipment_platform(
             design_scenario["h2_storage_location"] == "platform"
             and greenheart_config["h2_storage"]["type"] != "none"
         ):
-            topmass += (
-                h2_storage_results["tank_mass_full_kg"] * 1e-3
-            )  # from kg to tonnes
+            topmass += h2_storage_results["tank_mass_full_kg"] * 1e-3  # from kg to tonnes
             toparea += h2_storage_results["tank_footprint_m2"]
 
         if (
@@ -613,25 +538,19 @@ def run_equipment_platform(
             topmass += battery_mass
             toparea += battery_area
 
-        if (
-            hopp_config["site"]["solar"]
-            and design_scenario["pv_location"] == "platform"
-        ):
+        if hopp_config["site"]["solar"] and design_scenario["pv_location"] == "platform":
             pv_area = hopp_results["hybrid_plant"].pv.footprint_area
             solar_mass = hopp_results["hybrid_plant"].pv.system_mass
 
             if pv_area > toparea:
-                warnings.warn(
-                    f"Solar area ({pv_area} m^2) must be smaller than platform area ({toparea} m^2)",
-                    UserWarning,
+                msg = (
+                    f"Solar area ({pv_area} m^2) must be smaller than platform area ({toparea} m^2)"
                 )
+                warnings.warn(msg, UserWarning)
             topmass += solar_mass
 
         #### initialize
-        if (
-            greenheart_config["platform"]["design_phases"][0]
-            == "FloatingPlatformDesign"
-        ):
+        if greenheart_config["platform"]["design_phases"][0] == "FloatingPlatformDesign":
             if not ProjectManager.find_key_match("FloatingPlatformDesign"):
                 ProjectManager.register_design_phase(FloatingPlatformDesign)
             if not ProjectManager.find_key_match("FloatingPlatformInstallation"):
@@ -650,7 +569,7 @@ def run_equipment_platform(
         if platform_config["site"]["distance"] == -1:
             platform_config["site"]["distance"] = orbit_config["site"]["distance"]
         # assign equipment values
-        
+
         if platform_config["equipment"]["tech_combined_mass"] == -1:
             platform_config["equipment"]["tech_combined_mass"] = topmass
         if platform_config["equipment"]["tech_required_area"] == -1:
@@ -680,10 +599,10 @@ def run_equipment_platform(
         "capex": total_capex,
         "opex": total_opex,
     }
-    
+
     if verbose:
         print("\nPlatform Results")
         for key in platform_results.keys():
-            print(key, "%.2f" % (platform_results[key]))
+            print(key, f"{platform_results[key]:.2f}")
 
     return platform_results

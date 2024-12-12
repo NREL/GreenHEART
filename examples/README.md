@@ -14,7 +14,7 @@ The first three notebooks focus on the GreenHEART simulation interface, which su
 - **04-PEM_electrolyzer.ipynb**: Details the use of the GreenHEART PEM Water Electrolyzer model, including key components and operation.
 
 ## Quick Start
-1. Clone the repository: 
+1. Clone the repository:
     ```bash
     git clone https://github.com/NREL/GreenHEART.git
     ```
@@ -37,20 +37,19 @@ The first three notebooks focus on the GreenHEART simulation interface, which su
     NREL_API_EMAIL=your.name@email.com
     ```
 5. Open a Jupyter Notebook environment to explore the examples:
-   
+
     ```bash
    jupyter notebook
    ```
 
 **OR**
-1. Clone the repository: 
+1. Clone the repository:
     ```bash
     git clone https://github.com/NREL/GreenHEART.git
     ```
 2. Follow the setup instructions in the main `README.md`
 3. Open a Jupyter Notebook environment to explore the examples:
-   
+
     ```bash
    jupyter notebook
    ```
-

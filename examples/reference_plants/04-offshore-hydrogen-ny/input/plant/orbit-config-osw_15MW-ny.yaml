@@ -35,10 +35,10 @@ array_system:
   free_cable_length: 0.5
 array_system_design:
   cables:
-  - XLPE_185mm_66KV 
+  - XLPE_185mm_66KV
   - XLPE_630mm_66KV
 export_system_design:
-  cables: 
+  cables:
   - HVDC_2000mm_320kV # as done for OSW HVDC
   # - XLPE_1000mm_220kV # HVAC
   percent_added_length: 0.1 # ORBIT/WISDEM default
@@ -48,7 +48,7 @@ scour_protection_design:
 MonopileDesign:
   monopile_steel_cost: 3500 # USD/t ORBIT new inputs
   tp_steel_cost: 4500 # USD/t ORBIT new inputs
-# Configured Phases 
+# Configured Phases
 design_phases:
 - ArraySystemDesign # from ORBIT/examples/configs/example_fixed_project.yaml
 - MonopileDesign # from ORBIT/examples/configs/example_fixed_project.yaml
@@ -73,7 +73,7 @@ install_phases: # based on Fig. B-7 in https://www.boem.gov/sites/default/files/
 
 # Wind Project Inputs
 project_parameters:
-  turbine_capex: 1500 # $USD turbine CAPEX only as per discussion with Matt Shields 
+  turbine_capex: 1500 # $USD turbine CAPEX only as per discussion with Matt Shields
   opex_rate: 57.67069 #osw national analysis, $USD/kW/yr ATB 2022, OpEx based on R&D assumptions with a base year of 2022. ATB https://atb.nrel.gov/electricity/2022/offshore_wind
   # commissioning: 0.01 # ORBIT default
   # decommissioning: 0.15 # ORBIT default

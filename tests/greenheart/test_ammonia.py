@@ -2,6 +2,7 @@ from pytest import approx
 
 from greenheart.simulation.technologies.ammonia import ammonia
 
+
 grid_prices_dict = {
     "2035": 89.42320514456621,
     "2036": 89.97947569251141,
@@ -126,9 +127,7 @@ def test_ammonia_size_h2_input(subtests):
         ),
     )
 
-    res: ammonia.AmmoniaCapacityModelOutputs = ammonia.run_size_ammonia_plant_capacity(
-        config
-    )
+    res: ammonia.AmmoniaCapacityModelOutputs = ammonia.run_size_ammonia_plant_capacity(config)
 
     with subtests.test("Ammonia plant size"):
         assert res.ammonia_plant_capacity_kgpy == approx(334339658.8730839)
@@ -149,9 +148,7 @@ def test_ammonia_size_NH3_input(subtests):
         ),
     )
 
-    res: ammonia.AmmoniaCapacityModelOutputs = ammonia.run_size_ammonia_plant_capacity(
-        config
-    )
+    res: ammonia.AmmoniaCapacityModelOutputs = ammonia.run_size_ammonia_plant_capacity(config)
 
     with subtests.test("Ammonia plant size"):
         assert res.ammonia_plant_capacity_kgpy == approx(371488509.8589821)

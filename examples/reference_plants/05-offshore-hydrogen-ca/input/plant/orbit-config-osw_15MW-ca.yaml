@@ -93,7 +93,7 @@ substructure:
 
 # Wind Project Inputs
 project_parameters:
-  turbine_capex: 1500 # $USD turbine CAPEX only as per discussion with Matt Shields 
+  turbine_capex: 1500 # $USD turbine CAPEX only as per discussion with Matt Shields
   opex_rate: 47.29652759 #osw national analysis, $USD/kW/yr ATB 2022, OpEx based on R&D assumptions with a base year of 2022. ATB https://atb.nrel.gov/electricity/2022/offshore_wind
   # commissioning: 0.01 # ORBIT default
   # decommissioning: 0.15 # ORBIT default

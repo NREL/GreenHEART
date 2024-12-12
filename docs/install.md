@@ -64,7 +64,7 @@ For most use cases, installing from source will be the preferred installation ro
         ```bash
         conda install -y -c conda-forge coin-or-cbc=2.10.8
         ```
-    
+
     2. Windows users will have to manually install Cbc: https://github.com/coin-or/Cbc
 
 An additional step can be added if additional dependencies are required, or you plan to use this
@@ -123,7 +123,7 @@ pip install -e ".[all]"
     - If you want to just use GreenHEART:
 
        ```bash
-       pip install .  
+       pip install .
        ```
 
     - If you want to work with the examples:
@@ -132,7 +132,7 @@ pip install -e ".[all]"
        pip install ".[examples]"
        ```
 
-    - If you also want development dependencies for running tests and building docs:  
+    - If you also want development dependencies for running tests and building docs:
 
        ```bash
        pip install -e ".[develop]"
@@ -143,3 +143,24 @@ pip install -e ".[all]"
       ```bash
       pip install -e ".[all]"
       ```
+
+## Developer Notes
+
+Developers should add install using `pip install -e ".[all]"` to ensure documentation testing, and
+linting can be done without any additional installation steps.
+
+Please be sure to also install the pre-commit hooks if contributing code back to the main
+repository via the following. This enables a series of automated formatting and code linting
+(style and correctness checking) to ensure the code is stylistically consistent.
+
+```bash
+pre-commit install
+```
+
+If a check (or multiple) fails (commit is blocked), and reformatting was done, then restage
+(`git add`) your files and commit them again to see if all issues were resolved without user
+intervention. If changes are required follow the suggested fix, or resolve the stated
+issue(s). Restaging and committing may take multiple attempts steps if errors are unaddressed
+or insufficiently addressed. Please see [pre-commit](https://pre-commit.com/),
+[ruff](https://docs.astral.sh/ruff/), or [isort](https://pycqa.github.io/isort/) for more
+information.

@@ -118,9 +118,9 @@ ENV/
 
 # GreenHEART structure specific
 tests/greenheart/data/*
-tests/greenheart/output.txt 
+tests/greenheart/output.txt
 tests/greenheart/test_hydrogen/data/*
-tests/greenheart/test_hydrogen/output.txt 
+tests/greenheart/test_hydrogen/output.txt
 *speed_dir_data.csv
 examples/greenheart/*/data
 examples/greenheart/*/figures

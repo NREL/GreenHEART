@@ -3,21 +3,21 @@
 
 .. automodule:: greenheart.tools
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30,4 +30,3 @@
    greenheart.tools.eco
    greenheart.tools.optimization
    greenheart.tools.plant_sizing_estimation
-

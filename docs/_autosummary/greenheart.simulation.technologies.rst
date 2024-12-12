@@ -3,21 +3,21 @@ greenheart.simulation.technologies
 
 .. automodule:: greenheart.simulation.technologies
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -31,4 +31,3 @@ greenheart.simulation.technologies
    greenheart.simulation.technologies.hydrogen
    greenheart.simulation.technologies.offshore
    greenheart.simulation.technologies.steel
-

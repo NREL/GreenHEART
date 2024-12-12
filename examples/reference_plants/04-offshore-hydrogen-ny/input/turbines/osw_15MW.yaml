@@ -15,15 +15,15 @@ TSR: 8.0
 operation_model: cosine-loss
 tower:
   deck_space: 78.5 # m^2 based on OSW 15 MW turbine --> 10 m diam base pi*d^2/4 #TODO
-  sections: 2 
+  sections: 2
   type: Tower
   length: 144.386 # m [2]
   mass: 853.4632377 #t [2]
   section_diameters: # m [2] - diameter for bottom and top
-    - 10.0 
+    - 10.0
     - 6.5 #  8.833m at 67m height
   section_heights: # m [2] - just bottom and top
-    - 0 
+    - 0
     - 144.386
 nacelle:
   deck_space: 242 # Shields 203     # m^2 old #TODO
@@ -33,7 +33,7 @@ blade:
   deck_space: 480 # Shields et al. 608 IEA-15   # m^2 (length * root diam) #TODO
   length: 117  # m [1]
   type: Blade
-  mass: 68.4152932 # t [2] 
+  mass: 68.4152932 # t [2]
 power_thrust_table:
   ref_air_density: 1.225
   ref_tilt: 6.0

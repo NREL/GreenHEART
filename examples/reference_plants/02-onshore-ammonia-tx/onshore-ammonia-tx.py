@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # for optimization
     # prob, config = run_greenheart(config, run_only=False)
-    
+
     lcoe = prob.get_val("lcoe", units="USD/(MW*h)")
     lcoh = prob.get_val("lcoh", units="USD/kg")
     lcoa = prob.get_val("lcoa", units="USD/kg")

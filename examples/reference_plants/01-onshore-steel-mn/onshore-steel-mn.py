@@ -5,6 +5,7 @@ from pathlib import Path
 from greenheart.simulation.greenheart_simulation import GreenHeartSimulationConfig
 from greenheart.tools.optimization.gc_run_greenheart import run_greenheart
 
+
 DATA_PATH = Path(__file__).parent / "input"
 
 # run the stuff
@@ -36,7 +37,7 @@ if __name__ == "__main__":
 
     # for optimization
     # prob, config = run_greenheart(config, run_only=False)
-    
+
     lcoe = prob.get_val("lcoe", units="USD/(MW*h)")
     lcoh = prob.get_val("lcoh", units="USD/kg")
     lcos = prob.get_val("lcos", units="USD/t")

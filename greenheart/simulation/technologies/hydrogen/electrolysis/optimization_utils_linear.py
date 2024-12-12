@@ -1,9 +1,8 @@
-from pyomo.environ import *
-import random
-import numpy as np
-import matplotlib.pyplot as plt
 import time
-import os
+from pathlib import Path
+
+import numpy as np
+from pyomo.environ import *  # FIXME: no * imports, delete whole comment when fixed # noqa: F403
 
 
 def optimize(
@@ -20,47 +19,49 @@ def optimize(
     AC_init=0,
     F_tot_init=0,
 ):
-    model = ConcreteModel()
+    model = ConcreteModel()  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
     # Things to solve:
     C_INV = 1.47e6
     LT = 90000
 
     # Initializations
     if P_init is None:
-        P_init = [0 for i in range(n_stacks * T)]
+        P_init = [0] * (n_stacks * T)
     else:
         P_init = P_init.flatten()
     if I_init is None:
-        I_init = [0 for i in range(n_stacks * T)]
+        I_init = [0] * (n_stacks * T)
     else:
         I_init = I_init.flatten()
     if T_init is None:
-        T_init = [0 for i in range(n_stacks * T)]
+        T_init = [0] * (n_stacks * T)
     else:
         T_init = T_init.flatten()
 
-    model.p = Var(
-        [i for i in range(n_stacks * T)],
+    model.p = Var(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+        list(range(n_stacks * T)),
         bounds=(-1e-2, rated_power),
         initialize=P_init,
     )
-    model.I = Var(
-        [i for i in range(n_stacks * T)],
-        within=Binary,
+    model.I = Var(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+        list(range(n_stacks * T)),
+        within=Binary,  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
         initialize=I_init,  # .astype(int),
     )
-    model.T = Var(
-        [i for i in range(n_stacks * T)],
-        within=Binary,
+    model.T = Var(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+        list(range(n_stacks * T)),
+        within=Binary,  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
         initialize=T_init,  # .astype(int),
     )
-    model.AC = Var(
+    model.AC = Var(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
         [0], bounds=(1e-3, 1.2 * rated_power * n_stacks * T), initialize=float(AC_init)
     )
-    model.F_tot = Var(
+    model.F_tot = Var(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
         [0], bounds=(1e-3, 8 * rated_power * n_stacks * T), initialize=float(F_tot_init)
     )
-    model.eps = Param(initialize=1, mutable=True)
+    model.eps = Param(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+        initialize=1, mutable=True
+    )
 
     C_WP = c_wp * np.ones(
         T,
@@ -124,10 +125,18 @@ def optimize(
         trans = model.I[t * n_stacks + stack] - model.I[(t - 1) * n_stacks + stack]
         return -model.T[t * n_stacks + stack] <= trans
 
-    model.pwr_constraints = ConstraintList()
-    model.safety_constraints = ConstraintList()
-    model.switching_constraints = ConstraintList()
-    model.physical_constraints = ConstraintList()
+    model.pwr_constraints = (
+        ConstraintList()  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+    )
+    model.safety_constraints = (
+        ConstraintList()  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+    )
+    model.switching_constraints = (
+        ConstraintList()  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+    )
+    model.physical_constraints = (
+        ConstraintList()  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+    )
 
     for t in range(T):
         model.pwr_constraints.add(power_constraint(model, t))
@@ -136,42 +145,49 @@ def optimize(
             model.safety_constraints.add(safety_bounds_upper(model, t, stack))
 
             if t > 0:
-                model.switching_constraints.add(
-                    switching_constraint_pos(model, stack, t)
-                )
-                model.switching_constraints.add(
-                    switching_constraint_neg(model, stack, t)
-                )
+                model.switching_constraints.add(switching_constraint_pos(model, stack, t))
+                model.switching_constraints.add(switching_constraint_neg(model, stack, t))
     model.physical_constraints.add(physical_constraint_F_tot(model))
     model.physical_constraints.add(physical_constraint_AC(model))
-    model.objective = Objective(expr=obj(model), sense=minimize)
+    model.objective = (
+        Objective(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+            expr=obj(model),
+            sense=minimize,  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+        )
+    )
     eps = 10
-    cbc_path = os.path.abspath('')+'\\hybrid\\PEM_Model_2Push\\cbc.exe'
-    solver = SolverFactory('cbc', executable=cbc_path) # Use this if you have a Windows machine; also make sure that cbc.exe is in the same folder as this script
-    #solver = SolverFactory("cbc") # Use this if you don't have a windows machine
+    cbc_path = Path(__file__).parent / "hybrid/PEM_Model_2Push/cbc.exe"
+
+    # Use this if you have a Windows machine; also make sure that cbc.exe is in the same folder as
+    # this script
+    solver = SolverFactory(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+        "cbc", executable=cbc_path
+    )
+
+    # Use this if you don't have a windows machine
+    # solver = SolverFactory("cbc")
+
     j = 1
     while eps > 1e-3:
         start = time.process_time()
-        results = solver.solve(model)
+        solver.solve(model)
         print("time to solve", time.process_time() - start)
 
-        model.eps = value(model.AC[0] / model.F_tot[0])  # optimal value
+        model.eps = value(  # FIXME: no * imports, delete whole comment when fixed # noqa: F405
+            model.AC[0] / model.F_tot[0]
+        )
         eps = model.AC[0].value - model.eps.value * model.F_tot[0].value
         j = j + 1
 
-    I = np.array([model.I[i].value for i in range(n_stacks * T)])
+    I = np.array([model.I[i].value for i in range(n_stacks * T)])  # noqa: E741
     I_ = np.reshape(I, (T, n_stacks))
     P = np.array([model.p[i].value for i in range(n_stacks * T)])
     P_ = np.reshape(P, (T, n_stacks))
-    Tr = np.array([model.T[i].value for i in range(n_stacks * T)]).reshape(
-        (T, n_stacks)
-    )
+    Tr = np.array([model.T[i].value for i in range(n_stacks * T)]).reshape((T, n_stacks))
     P_tot_opt = np.sum(P_, axis=1)
     H2f = np.zeros((T, n_stacks))
     for stack in range(n_stacks):
-        H2f[:, stack] = (
-            0.0145 * P_[:, stack] + 0.3874 * I_[:, stack] * rated_power / 500
-        ) * dt
+        H2f[:, stack] = (0.0145 * P_[:, stack] + 0.3874 * I_[:, stack] * rated_power / 500) * dt
     return (
         P_tot_opt,
         P_,

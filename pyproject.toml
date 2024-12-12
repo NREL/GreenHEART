@@ -87,6 +87,9 @@ changelog = "https://github.com/NREL/GreenHEART/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 develop = [
+    "pre-commit",
+    "isort",
+    "ruff",
     "pytest",
     "pytest-subtests",
     "responses",
@@ -129,3 +132,113 @@ python_files = [
 testpaths = [
   "test/greenheart/*.py",
 ]
+
+[tool.isort]
+src_paths = ["greeneart", "tests"]
+skip = ["__init__.py"]
+multi_line_output = 3
+sections = [
+  "FUTURE",
+  "STDLIB",
+  "THIRDPARTY",
+  "FIRSTPARTY",
+  "LOCALFOLDER",
+]
+known_first_party = "greenheart"
+known_local_folder = "tests"
+combine_as_imports = true
+force_grid_wrap = 0
+include_trailing_comma = true
+use_parentheses = true
+length_sort = true
+lines_after_imports = 2
+line_length = 100
+
+[tool.ruff]
+src = ["greenheart", "tests"]
+line-length = 100
+target-version = "py310"
+fix = true
+exclude = [
+  ".git",
+  "__pycache__",
+  "docs/source/conf.py",
+  "old",
+  "build",
+  "dist",
+  "^tests/",
+  ".ruff_cache",
+]
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+unfixable = []
+
+# https://docs.astral.sh/ruff/rules/
+select = [
+  "F",
+  "E",
+  "W",
+  # "N",  # TODO: renaming needs to be seriously cleaned up prior to using
+  "C4",
+  # "D",  # leave out until rebrand/refactor
+  "UP",
+  "BLE",
+  # "FBT",  # TODO: consider alongside rebrand/refactor
+  "B",
+  "A",
+  "LOG",
+  "G",
+  # "PT",  # TODO: very tedious for now
+  "NPY",
+  "PD",
+  "PTH",
+  "PERF",
+  "Q",
+  "FURB",
+  "RUF",
+]
+
+ignore = [
+  "E731",
+  "E402",
+  "D202",
+  "D212",
+  "C901",
+  "D205",
+  "D401",
+  "PD901",
+  "PERF203",
+  "PD011",
+  "RUF015",
+  "UP038",  # NOTE: integrate with Python >= 3.10
+  "N806",  # NOTE: many variable names use an uppercase for legitimate reasons
+  "N802",  # NOTE: many function names use an uppercase for legitimate reasons
+  "B905",
+
+  # TODO: People who wrote warnings should decide on the appropriate stacklevel
+  "B028",
+
+  # TODO: People responsible for these errors will need to fix them accordingly as they are bugs
+  "B006",
+  "B008",
+  "B023",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*/__init__.py" = ["E501", "D104", "F401", "F403"]  # NOTE: F403 discouraged
+"tests/*" = ["D100", "D101", "D102", "D103"]
+"greenheart/to_organize/gradient_free.py" = ["NPY002"]  # TODO: new NumPy needs to be addressed
+"greenheart/to_organize/inputs_py.py" = ["F821"]  # TODO: there are zero inputs, but many vars
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true

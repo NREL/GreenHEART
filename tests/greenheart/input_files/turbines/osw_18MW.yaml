@@ -13,12 +13,12 @@ TSR: 9.0 # [2]
 operation_model: cosine-loss # [3]
 tower:
   deck_space: 78.5 # m^2 (old power-fit=10.2m diam) [4]
-  sections: 2 
+  sections: 2
   type: Tower
   length: 157 # m estimate
   mass: 930.508 #t scaled from 15MW based on length
   section_diameters: # m estimate - diameter for bottom and top
-    - 10.2 
+    - 10.2
     - 6.7 #  8.833m at 67m height
   section_heights: # m estimate - just bottom and top
     - 0.0

@@ -1,6 +1,9 @@
-from greenheart.simulation.technologies.hydrogen.electrolysis.PEM_costs_Singlitico_model import PEMCostsSingliticoModel
-from pytest import approx
 import numpy as np
+from pytest import approx
+
+from greenheart.simulation.technologies.hydrogen.electrolysis.PEM_costs_Singlitico_model import (
+    PEMCostsSingliticoModel,
+)
 
 
 TOL = 1e-3
@@ -18,11 +21,11 @@ BASELINE = np.array(
     ]
 )
 
-class TestPEMCostsSingliticoModel():
 
+class TestPEMCostsSingliticoModel:
     def test_calc_capex(self):
-        P_elec = 0.1 # [GW]
-        RC_elec = 700 # [MUSD/GW]
+        P_elec = 0.1  # [GW]
+        RC_elec = 700  # [MUSD/GW]
 
         # test onshore capex
         pem_onshore = PEMCostsSingliticoModel(elec_location=0)
@@ -37,7 +40,7 @@ class TestPEMCostsSingliticoModel():
         assert capex_offshore == approx(BASELINE[1][0][0], TOL)
 
     def test_calc_opex(self):
-        P_elec = 0.1 # [GW]
+        P_elec = 0.1  # [GW]
         capex_onshore = BASELINE[0][0][0]
         capex_offshore = BASELINE[1][0][0]
 
@@ -54,8 +57,8 @@ class TestPEMCostsSingliticoModel():
         assert opex_offshore == approx(BASELINE[1][0][1], TOL)
 
     def test_run(self):
-        P_elec = 0.1 # [GW]
-        RC_elec = 700 # [MUSD/GW]
+        P_elec = 0.1  # [GW]
+        RC_elec = 700  # [MUSD/GW]
 
         # test onshore opex
         pem_onshore = PEMCostsSingliticoModel(elec_location=0)

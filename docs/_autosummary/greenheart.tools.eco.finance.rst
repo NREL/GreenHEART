@@ -3,16 +3,16 @@ greenheart.tools.eco.finance
 
 .. automodule:: greenheart.tools.eco.finance
 
-   
-   
-   
 
-   
-   
+
+
+
+
+
    .. rubric:: Functions
 
    .. autosummary::
-   
+
       adjust_orbit_costs
       breakout_export_costs_from_orbit_results
       run_capex
@@ -22,23 +22,14 @@ greenheart.tools.eco.finance
       run_profast_grid_only
       run_profast_lcoe
       run_wind_cost_model
-   
-   
 
-   
-   
+
+
+
+
    .. rubric:: Classes
 
    .. autosummary::
-   
+
       WindCostConfig
       WindCostOutputs
-   
-   
-
-   
-   
-   
-
-
-

@@ -1,16 +1,24 @@
-import os
-from pytest import approx, fixture
+from pathlib import Path
+
 import numpy as np
-
-from greenheart.simulation.technologies.hydrogen.electrolysis.PEM_BOP.PEM_BOP import (
-    pem_bop,
-)
-from greenheart.simulation.greenheart_simulation import (
-    run_simulation,
-    GreenHeartSimulationConfig,
-)
-
+from pytest import approx, fixture
 from ORBIT.core.library import initialize_library
+
+from greenheart.simulation.greenheart_simulation import GreenHeartSimulationConfig, run_simulation
+from greenheart.simulation.technologies.hydrogen.electrolysis.PEM_BOP.PEM_BOP import pem_bop
+
+
+LIBRARY = Path(__file__).parents[1] / "input_files/"
+
+initialize_library(LIBRARY)
+
+turbine_model = "osw_18MW"
+filename_turbine_config = LIBRARY / f"turbines/{turbine_model}.yaml"
+filename_orbit_config = LIBRARY / f"plant/orbit-config-{turbine_model}-stripped.yaml"
+filename_floris_config = LIBRARY / f"floris/floris_input_{turbine_model}.yaml"
+filename_greenheart_config = LIBRARY / "plant/greenheart_config.yaml"
+filename_hopp_config = LIBRARY / "plant/hopp_config.yaml"
+
 
 @fixture
 def bop_energy():
@@ -50,30 +58,6 @@ def test_bop_energy(subtests, bop_energy):
     with subtests.test("full power"):
         assert bop_energy[5] == approx(7847.85)
 
-dirname = os.path.dirname(__file__)
-parent_dir = os.path.dirname(dirname)
-
-library_path = os.path.join(parent_dir, "input_files/")
-
-initialize_library(library_path)
-
-turbine_model = "osw_18MW"
-filename_turbine_config = os.path.join(
-    library_path, f"turbines/{turbine_model}.yaml"
-)
-filename_orbit_config = os.path.join(
-    library_path, f"plant/orbit-config-{turbine_model}-stripped.yaml"
-)
-filename_floris_config = os.path.join(
-    library_path, f"floris/floris_input_{turbine_model}.yaml"
-)
-filename_greenheart_config = os.path.join(
-    library_path, f"plant/greenheart_config.yaml"
-)
-
-filename_hopp_config = os.path.join(
-    library_path, f"plant/hopp_config.yaml"
-)
 
 def test_greenheart_simulation_pem_bop(subtests):
     config = GreenHeartSimulationConfig(
@@ -91,12 +75,12 @@ def test_greenheart_simulation_pem_bop(subtests):
         plant_design_scenario=1,
         output_level=3,
     )
-    lcoh,_,_,_,_,_,_,annual_energy_breakdown = run_simulation(config)
+    lcoh, _, _, _, _, _, _, annual_energy_breakdown = run_simulation(config)
 
     # include electrolyzer bop power consumption in greenheart simulation
-    config.greenheart_config['electrolyzer']["include_bop_power"] = True
+    config.greenheart_config["electrolyzer"]["include_bop_power"] = True
 
-    lcoh2,_,_,_,_,_,_,annual_energy_breakdown2 = run_simulation(config)
+    lcoh2, _, _, _, _, _, _, annual_energy_breakdown2 = run_simulation(config)
 
     with subtests.test("LCOH not equal"):
         assert lcoh != lcoh2
@@ -105,4 +89,6 @@ def test_greenheart_simulation_pem_bop(subtests):
         assert annual_energy_breakdown["electrolyzer_bop_energy_kwh"] == 0
 
     with subtests.test("annual_energy_breakdown electrolyzer bop"):
-        assert annual_energy_breakdown2["electrolyzer_bop_energy_kwh"] == approx(79921217.81100339,1e-3)
+        assert annual_energy_breakdown2["electrolyzer_bop_energy_kwh"] == approx(
+            79921217.81100339, 1e-3
+        )

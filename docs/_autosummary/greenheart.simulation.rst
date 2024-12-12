@@ -3,21 +3,21 @@
 
 .. automodule:: greenheart.simulation
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -29,4 +29,3 @@
 
    greenheart.simulation.greenheart_simulation
    greenheart.simulation.technologies
-

@@ -1,5 +1,5 @@
 site:
-  mean_windspeed: False 
+  mean_windspeed: False
   depth: 0 #m
   wind_layout:
     row_spacing: 5  # Also defined in ORBIT config for offshore layout. Greenheart config values override the values in ORBIT.
@@ -59,15 +59,15 @@ electrolyzer:
   sizing:
     resize_for_enduse: False
     size_for: 'BOL' #'BOL' (generous) or 'EOL' (conservative)
-    hydrogen_dmd: 
-  rating: 1160 # MW 
+    hydrogen_dmd:
+  rating: 1160 # MW
   cluster_rating_MW: 40
   pem_control_type: 'basic'
   eol_eff_percent_loss: 13 #eol defined as x% change in efficiency from bol
   uptime_hours_until_eol: 77600 #number of 'on' hours until electrolyzer reaches eol
   include_degradation_penalty: True #include degradation
   turndown_ratio: 0.1 #turndown_ratio = minimum_cluster_power/cluster_rating_MW
-  electrolyzer_capex: 1600 # $/kW 
+  electrolyzer_capex: 1600 # $/kW
   time_between_replacement: 62320 # 62320 based on PEM Electrolysis H2A Production Case Study Documentation estimate of 7 years, 40000 based on current est (see unpublished report), 80000 hours based on OSW atb_year = 2025
   replacement_cost_percent: 0.15 # percent of capex - H2A default case
   cost_model: "singlitico2021" # "basic" is a basic cost model based on H2a and HFTO program record for PEM electrolysis. "singlitico2021" uses cost estimates from that paper
@@ -82,9 +82,9 @@ h2_transport_pipe:
   outlet_pressure: 10 # bar - from example in code from Jamie #TODO check this value
 h2_storage:
   size_capacity_from_demand:
-    flag: True # If True, then storage is sized to provide steady-state storage    
+    flag: True # If True, then storage is sized to provide steady-state storage
   capacity_from_max_on_turbine_storage: False # if True, then days of storage is ignored and storage capacity is based on how much h2 storage fits on the turbines in the plant using Kottenstete 2003.
-  type: "lined_rock_cavern" # can be one of ["none", "pipe", "turbine", "pressure_vessel", "salt_cavern", "lined_rock_cavern"]  
+  type: "lined_rock_cavern" # can be one of ["none", "pipe", "turbine", "pressure_vessel", "salt_cavern", "lined_rock_cavern"]
   days: 0 #8.57267 # from `hydrogen_storage_duration_hr` = 205.74419987482239 [days] how many days worth of production we should be able to store (this is ignored if `capacity_from_max_on_turbine_storage` is set to True)
 
 policy_parameters: # these should be adjusted for inflation prior to application - order of operations: rate in 1992 $,
@@ -310,10 +310,10 @@ steel:
 
 opt_options:
   opt_flag: True
-  general: 
+  general:
     folder_output: "output"
     fname_output: "optimization_log"
-  design_variables: 
+  design_variables:
     electrolyzer_rating_kw:
       flag: True
       lower: 1000.0
@@ -357,7 +357,7 @@ opt_options:
       flag: False
       lower: 0.0
     pv_to_platform_area_ratio:
-      flag: False 
+      flag: False
       upper: 1.0 # relative size of solar pv area to platform area
     user: {}
   merit_figure: "lcos"
@@ -389,7 +389,7 @@ opt_options:
       criterion: None # [None, center, c, maximin, m, centermaximin, cm, correelation, corr]
       iterations: 1
       debug_print: False
-    step_size_study: 
+    step_size_study:
       flag: False
   recorder:
     flag: True

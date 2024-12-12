@@ -3,21 +3,21 @@ greenheart.tools.eco
 
 .. automodule:: greenheart.tools.eco
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
 
-   
-   
-   
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -32,4 +32,3 @@ greenheart.tools.eco
    greenheart.tools.eco.hopp_mgmt
    greenheart.tools.eco.hydrogen_mgmt
    greenheart.tools.eco.utilities
-

@@ -1,35 +1,27 @@
+import warnings
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import ticker
-import os
-import warnings
+
 from greenheart.tools.eco.utilities import ceildiv
-
-# import hopp.tools.hopp_tools as hopp_tools
-
 from greenheart.simulation.technologies.hydrogen.desal.desal_model_eco import (
     RO_desal_eco as RO_desal,
 )
-from greenheart.simulation.technologies.hydrogen.electrolysis.pem_mass_and_footprint import (
-    mass as run_electrolyzer_mass,
-)
-from greenheart.simulation.technologies.hydrogen.electrolysis.pem_mass_and_footprint import (
-    footprint as run_electrolyzer_footprint,
-)
+from greenheart.simulation.technologies.hydrogen.electrolysis.run_h2_PEM import run_h2_PEM
 from greenheart.simulation.technologies.hydrogen.electrolysis.H2_cost_model import (
     basic_H2_cost_model,
+)
+from greenheart.simulation.technologies.hydrogen.electrolysis.PEM_BOP.PEM_BOP import pem_bop
+from greenheart.simulation.technologies.hydrogen.electrolysis.pem_mass_and_footprint import (
+    mass as run_electrolyzer_mass,
+    footprint as run_electrolyzer_footprint,
 )
 from greenheart.simulation.technologies.hydrogen.electrolysis.PEM_costs_Singlitico_model import (
     PEMCostsSingliticoModel,
 )
-
-# from hopp.simulation.technologies.hydrogen.electrolysis.run_h2_PEM_eco import run_h2_PEM
-from greenheart.simulation.technologies.hydrogen.electrolysis.run_h2_PEM import (
-    run_h2_PEM,
-)
-
-from greenheart.simulation.technologies.hydrogen.electrolysis.PEM_BOP.PEM_BOP import pem_bop
 
 
 def run_electrolyzer_physics(
@@ -42,7 +34,8 @@ def run_electrolyzer_physics(
     output_dir="./output/",
     verbose=False,
 ):
-
+    if isinstance(output_dir, str):
+        output_dir = Path(output_dir).resolve()
     electrolyzer_size_mw = greenheart_config["electrolyzer"]["rating"]
     electrolyzer_capex_kw = greenheart_config["electrolyzer"]["electrolyzer_capex"]
 
@@ -53,9 +46,9 @@ def run_electrolyzer_physics(
         # system level.
         if greenheart_config["electrolyzer"]["sizing"]["hydrogen_dmd"] is not None:
             grid_connection_scenario = "grid-only"
-            hydrogen_production_capacity_required_kgphr = greenheart_config[
-                "electrolyzer"
-            ]["sizing"]["hydrogen_dmd"]
+            hydrogen_production_capacity_required_kgphr = greenheart_config["electrolyzer"][
+                "sizing"
+            ]["hydrogen_dmd"]
             energy_to_electrolyzer_kw = []
         else:
             grid_connection_scenario = "off-grid"
@@ -68,25 +61,28 @@ def run_electrolyzer_physics(
         energy_to_electrolyzer_kw = np.asarray(
             hopp_results["combined_hybrid_power_production_hopp"]
         )
-        
-    n_pem_clusters = int(ceildiv(electrolyzer_size_mw, greenheart_config["electrolyzer"]["cluster_rating_MW"]))
+
+    n_pem_clusters = int(
+        ceildiv(electrolyzer_size_mw, greenheart_config["electrolyzer"]["cluster_rating_MW"])
+    )
 
     ## run using greensteel model
     pem_param_dict = {
-        "eol_eff_percent_loss": greenheart_config["electrolyzer"][
-            "eol_eff_percent_loss"
-        ],
-        "uptime_hours_until_eol": greenheart_config["electrolyzer"][
-            "uptime_hours_until_eol"
-        ],
+        "eol_eff_percent_loss": greenheart_config["electrolyzer"]["eol_eff_percent_loss"],
+        "uptime_hours_until_eol": greenheart_config["electrolyzer"]["uptime_hours_until_eol"],
         "include_degradation_penalty": greenheart_config["electrolyzer"][
             "include_degradation_penalty"
         ],
         "turndown_ratio": greenheart_config["electrolyzer"]["turndown_ratio"],
     }
 
-    if "time_between_replacement" in greenheart_config['electrolyzer']:
-        warnings.warn("`time_between_replacement` as an input is deprecated. It is now calculated internally and is output in electrolyzer_physics_results['H2_Results']['Time Until Replacement [hrs]'].")
+    if "time_between_replacement" in greenheart_config["electrolyzer"]:
+        msg = (
+            "`time_between_replacement` as an input is deprecated. It is now calculated internally"
+            " and is output in electrolyzer_physics_results['H2_Results']['Time Until Replacement"
+            " [hrs]']."
+        )
+        warnings.warn(msg)
 
     H2_Results, h2_ts, h2_tot, power_to_electrolyzer_kw = run_h2_PEM(
         electrical_generation_timeseries=energy_to_electrolyzer_kw,
@@ -98,7 +94,7 @@ def run_electrolyzer_physics(
         pem_control_type=greenheart_config["electrolyzer"]["pem_control_type"],
         electrolyzer_direct_cost_kw=electrolyzer_capex_kw,
         user_defined_pem_param_dictionary=pem_param_dict,
-        grid_connection_scenario=grid_connection_scenario,  # if not offgrid, assumes steady h2 demand in kgphr for full year
+        grid_connection_scenario=grid_connection_scenario,  # if not offgrid, assumes steady h2 demand in kgphr for full year  # noqa: E501
         hydrogen_production_capacity_required_kgphr=hydrogen_production_capacity_required_kgphr,
         debug_mode=False,
         verbose=verbose,
@@ -139,15 +135,12 @@ def run_electrolyzer_physics(
             * 1e-3,
         )
 
-        prodrate = 1.0 / round(
-            H2_Results["Rated BOL: Efficiency [kWh/kg]"], 2
-        )  # kg/kWh
+        prodrate = 1.0 / round(H2_Results["Rated BOL: Efficiency [kWh/kg]"], 2)  # kg/kWh
         roughest = power_to_electrolyzer_kw * prodrate
         print("Energy to electrolyzer (kWh): ", sum(power_to_electrolyzer_kw))
         print(
             "Energy per kg (kWh/kg): ",
-            H2_Results["Sim: Total Input Power [kWh]"]
-            / H2_Results["Sim: Total H2 Produced [kg]"],
+            H2_Results["Sim: Total Input Power [kWh]"] / H2_Results["Sim: Total H2 Produced [kg]"],
         )
         print("Max hourly based on est kg/kWh (kg): ", max(roughest))
         print(
@@ -191,7 +184,7 @@ def run_electrolyzer_physics(
         ax[0, 0].plot(wind_speed)
         convolved_wind_speed = np.convolve(wind_speed, np.ones(N) / (N), mode="valid")
         ave_x = range(N, len(convolved_wind_speed) + N)
-        
+
         ax[0, 1].plot(ave_x, convolved_wind_speed)
         ax[0, 0].set(ylabel="Wind\n(m/s)", ylim=[0, 30], xlim=[0, len(wind_speed)])
         tick_spacing = 10
@@ -200,31 +193,30 @@ def run_electrolyzer_physics(
         y = greenheart_config["electrolyzer"]["rating"]
         ax[1, 0].plot(energy_to_electrolyzer_kw * 1e-3)
         ax[1, 0].axhline(y=y, color="r", linestyle="--", label="Nameplate Capacity")
-        
+
         convolved_energy_to_electrolyzer = np.convolve(
-                energy_to_electrolyzer_kw * 1e-3, np.ones(N) / (N), mode="valid"
-            )
-        
+            energy_to_electrolyzer_kw * 1e-3, np.ones(N) / (N), mode="valid"
+        )
+
         ax[1, 1].plot(
             ave_x,
             convolved_energy_to_electrolyzer,
         )
         ax[1, 1].axhline(y=y, color="r", linestyle="--", label="Nameplate Capacity")
-        ax[1, 0].set(
-            ylabel="Electrolyzer \nPower (MW)", ylim=[0, 500], xlim=[0, len(wind_speed)]
-        )
+        ax[1, 0].set(ylabel="Electrolyzer \nPower (MW)", ylim=[0, 500], xlim=[0, len(wind_speed)])
         # ax[1].legend(frameon=False, loc="best")
         tick_spacing = 200
         ax[1, 0].yaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
         ax[1, 0].text(1000, y + 0.1 * tick_spacing, "Electrolyzer Rating", color="r")
 
         ax[2, 0].plot(
-            electrolyzer_physics_results["H2_Results"][
-                "Hydrogen Hourly Production [kg/hr]"
-            ]
-            * 1e-3
+            electrolyzer_physics_results["H2_Results"]["Hydrogen Hourly Production [kg/hr]"] * 1e-3
         )
-        convolved_hydrogen_production = np.convolve(electrolyzer_physics_results["H2_Results"]["Hydrogen Hourly Production [kg/hr]"]*1e-3,np.ones(N) / (N), mode="valid")
+        convolved_hydrogen_production = np.convolve(
+            electrolyzer_physics_results["H2_Results"]["Hydrogen Hourly Production [kg/hr]"] * 1e-3,
+            np.ones(N) / (N),
+            mode="valid",
+        )
         ax[2, 1].plot(
             ave_x,
             convolved_hydrogen_production,
@@ -251,14 +243,14 @@ def run_electrolyzer_physics(
         plt.tight_layout()
         if save_plots:
             savepaths = [
-                output_dir + "figures/production/",
-                output_dir + "data/",
+                output_dir / "figures/production/",
+                output_dir / "data/",
             ]
             for savepath in savepaths:
-                if not os.path.exists(savepath):
-                    os.makedirs(savepath)
+                if not savepath.exists():
+                    savepath.mkdir(parents=True)
             plt.savefig(
-                savepaths[0] + "production_overview_%i.png" % (design_scenario["id"]),
+                savepaths[0] / f"production_overview_{design_scenario['id']}.png",
                 transparent=True,
             )
             pd.DataFrame.from_dict(
@@ -266,11 +258,11 @@ def run_electrolyzer_physics(
                     "Hydrogen Hourly Production [kg/hr]": H2_Results[
                         "Hydrogen Hourly Production [kg/hr]"
                     ],
-                    "Hourly Water Consumption [kg/hr]": electrolyzer_physics_results[
-                        "H2_Results"
-                    ]["Water Hourly Consumption [kg/hr]"],
+                    "Hourly Water Consumption [kg/hr]": electrolyzer_physics_results["H2_Results"][
+                        "Water Hourly Consumption [kg/hr]"
+                    ],
                 }
-            ).to_csv(savepaths[1] + "h2_flow_%i.csv" % (design_scenario["id"]))
+            ).to_csv(savepaths[1] / f"h2_flow_{design_scenario['id']}.csv")
         if show_plots:
             plt.show()
 
@@ -284,15 +276,12 @@ def run_electrolyzer_cost(
     design_scenario,
     verbose=False,
 ):
-
     # unpack inputs
     H2_Results = electrolyzer_physics_results["H2_Results"]
     electrolyzer_size_mw = greenheart_config["electrolyzer"]["rating"]
     useful_life = greenheart_config["project_parameters"]["project_lifetime"]
     atb_year = greenheart_config["project_parameters"]["atb_year"]
-    electrical_generation_timeseries = electrolyzer_physics_results[
-        "power_to_electrolyzer_kw"
-    ]
+    electrical_generation_timeseries = electrolyzer_physics_results["power_to_electrolyzer_kw"]
     nturbines = hopp_config["technologies"]["wind"]["num_turbines"]
 
     electrolyzer_cost_model = greenheart_config["electrolyzer"][
@@ -308,9 +297,7 @@ def run_electrolyzer_cost(
     if design_scenario["electrolyzer_location"] == "turbine":
         per_turb_electrolyzer_size_mw = electrolyzer_size_mw / nturbines
         per_turb_h2_annual_output = H2_Results["hydrogen_annual_output"] / nturbines
-        per_turb_electrical_generation_timeseries = (
-            electrical_generation_timeseries / nturbines
-        )
+        per_turb_electrical_generation_timeseries = electrical_generation_timeseries / nturbines
 
         if electrolyzer_cost_model == "basic":
             (
@@ -336,11 +323,8 @@ def run_electrolyzer_cost(
             )
 
         elif electrolyzer_cost_model == "singlitico2021":
-
             P_elec = per_turb_electrolyzer_size_mw * 1e-3  # [GW]
-            RC_elec = greenheart_config["electrolyzer"][
-                "electrolyzer_capex"
-            ]  # [USD/kW]
+            RC_elec = greenheart_config["electrolyzer"]["electrolyzer_capex"]  # [USD/kW]
 
             pem_offshore = PEMCostsSingliticoModel(elec_location=offshore)
 
@@ -356,9 +340,7 @@ def run_electrolyzer_cost(
                 per_turb_electrolyzer_om_cost_musd * 1e6
             )  # convert from M USD to USD
 
-        electrolyzer_total_capital_cost = (
-            per_turb_electrolyzer_total_capital_cost * nturbines
-        )
+        electrolyzer_total_capital_cost = per_turb_electrolyzer_total_capital_cost * nturbines
         electrolyzer_OM_cost = per_turb_electrolyzer_OM_cost * nturbines
 
     else:
@@ -385,11 +367,8 @@ def run_electrolyzer_cost(
                 offshore=offshore,
             )
         elif electrolyzer_cost_model == "singlitico2021":
-
             P_elec = electrolyzer_size_mw * 1e-3  # [GW]
-            RC_elec = greenheart_config["electrolyzer"][
-                "electrolyzer_capex"
-            ]  # [USD/kW]
+            RC_elec = greenheart_config["electrolyzer"]["electrolyzer_capex"]  # [USD/kW]
 
             pem_offshore = PEMCostsSingliticoModel(elec_location=offshore)
 
@@ -401,17 +380,14 @@ def run_electrolyzer_cost(
             electrolyzer_total_capital_cost = (
                 electrolyzer_capital_cost_musd * 1e6
             )  # convert from M USD to USD
-            electrolyzer_OM_cost = (
-                electrolyzer_om_cost_musd * 1e6
-            )  # convert from M USD to USD
+            electrolyzer_OM_cost = electrolyzer_om_cost_musd * 1e6  # convert from M USD to USD
 
         else:
-            raise (
-                ValueError(
-                    "Electrolyzer cost model must be one of['basic', 'singlitico2021'] but '%s' was given"
-                    % (electrolyzer_cost_model)
-                )
+            msg = (
+                f"Electrolyzer cost model must be one of['basic', 'singlitico2021'] but "
+                f"'{electrolyzer_cost_model}' was given"
             )
+            raise ValueError(msg)
 
     # package outputs for return
     electrolyzer_cost_results = {
@@ -433,37 +409,41 @@ def run_electrolyzer_cost(
         print(
             "Electrolyzer O&M $/kg: ",
             electrolyzer_OM_cost
-            / electrolyzer_physics_results["H2_Results"][
-                "Life: Annual H2 production [kg/year]"
-            ],
+            / electrolyzer_physics_results["H2_Results"]["Life: Annual H2 production [kg/year]"],
         )
 
     return electrolyzer_cost_results
 
-def run_electrolyzer_bop(
-        plant_config,
-        electrolyzer_physics_results,
 
+def run_electrolyzer_bop(
+    plant_config,
+    electrolyzer_physics_results,
 ):
     if "include_bop_power" in plant_config["electrolyzer"]:
-        if plant_config['electrolyzer']['include_bop_power']:
-            energy_consumption_bop = pem_bop(electrolyzer_physics_results["power_to_electrolyzer_kw"],
-                                            plant_config["electrolyzer"]["rating"],
-                                            plant_config["electrolyzer"]["turndown_ratio"])
-            warnings.warn(
-                "Electrolyzer BOP energy consumption is dominated by power electronics (AC-DC conversion and step-down) if electrical system is different consider setting `include_bop_power` to False.",
-                UserWarning
-                )
+        if plant_config["electrolyzer"]["include_bop_power"]:
+            energy_consumption_bop = pem_bop(
+                electrolyzer_physics_results["power_to_electrolyzer_kw"],
+                plant_config["electrolyzer"]["rating"],
+                plant_config["electrolyzer"]["turndown_ratio"],
+            )
+            msg = (
+                "Electrolyzer BOP energy consumption is dominated by power electronics (AC-DC"
+                " conversion and step-down) if electrical system is different consider setting"
+                " `include_bop_power` to False."
+            )
+            warnings.warn(msg, UserWarning)
         else:
-            energy_consumption_bop = np.zeros(len(electrolyzer_physics_results["power_to_electrolyzer_kw"]))
+            energy_consumption_bop = np.zeros(
+                len(electrolyzer_physics_results["power_to_electrolyzer_kw"])
+            )
     else:
-        energy_consumption_bop = np.zeros(len(electrolyzer_physics_results["power_to_electrolyzer_kw"]))
+        energy_consumption_bop = np.zeros(
+            len(electrolyzer_physics_results["power_to_electrolyzer_kw"])
+        )
     return energy_consumption_bop
 
 
-def run_desal(
-    plant_config, electrolyzer_physics_results, design_scenario, verbose=False
-):
+def run_desal(plant_config, electrolyzer_physics_results, design_scenario, verbose=False):
     if verbose:
         print("\n")
         print("Desal Results")
@@ -480,9 +460,7 @@ def run_desal(
         }
     else:
         freshwater_kg_per_hr = np.mean(
-            electrolyzer_physics_results["H2_Results"][
-                "Water Hourly Consumption [kg/hr]"
-            ]
+            electrolyzer_physics_results["H2_Results"]["Water Hourly Consumption [kg/hr]"]
         )  # to kg/hr
 
         if design_scenario["electrolyzer_location"] == "platform":
@@ -513,7 +491,8 @@ def run_desal(
         elif design_scenario["electrolyzer_location"] == "turbine":
             nturbines = plant_config["technologies"]["wind"]["num_turbines"]
 
-            # size for per-turbine desal #TODO consider using individual power generation time series from each turbine
+            # size for per-turbine desal
+            # TODO: consider using individual power generation time series from each turbine
             in_turb_freshwater_kg_per_hr = freshwater_kg_per_hr / nturbines
 
             (
