@@ -49,7 +49,7 @@ dependencies = [
     "openpyxl",
     "attrs",
     "utm",
-    "HOPP>=3.0",
+    "hopp>=3.1",
     "orbit-nrel>=1.1",
     "openmdao[all]",
     "ProFAST",

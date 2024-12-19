@@ -198,7 +198,7 @@ class SteelCapacityModelConfig:
     """
     Configuration inputs for the steel capacity sizing model, including plant capacity and
     feedstock details.
-
+ƒ
     Attributes:
         hydrogen_amount_kgpy Optional (float): The amount of hydrogen available in kilograms 
             per year to make steel.
@@ -317,8 +317,8 @@ def run_steel_cost_model(config: SteelCostModelConfig) -> SteelCostModelOutputs:
     """
     feedstocks = config.feedstocks
 
-    model_year_CEPCI = 596.2
-    equation_year_CEPCI = 708.8
+    model_year_CEPCI = 816.0 # 2022
+    equation_year_CEPCI = 708.8 # 2021
 
     capex_eaf_casting = (
         model_year_CEPCI
