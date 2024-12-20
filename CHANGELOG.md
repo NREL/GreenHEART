@@ -6,6 +6,9 @@
 - change units of `lcoe_real` in `HOPPComponent` from "MW*h" to "kW*h"
 - Adds `pre-commit`, `ruff`, and `isort` checks, and CI workflow to ensure these steps aren't
   skipped.
+- update steel cost year to 2022
+- update ammonia cost year to 2022
+- update tests to be compatible with HOPP 3.1.1 ProFAST integration
 
 ## v0.1.3 [1 November 2024]
 

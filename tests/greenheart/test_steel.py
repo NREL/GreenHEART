@@ -104,11 +104,11 @@ def test_steel_cost_model(subtests, cost_config):
     res: steel.SteelCostModelOutputs = steel.run_steel_cost_model(cost_config)
 
     with subtests.test("CapEx"):
-        assert res.total_plant_cost == approx(451513562.41513157)
+        assert res.total_plant_cost == approx(617972269.2565368)
     with subtests.test("Fixed OpEx"):
-        assert res.total_fixed_operating_cost == approx(99119892.8431614)
+        assert res.total_fixed_operating_cost == approx(104244740.28004119)
     with subtests.test("Installation"):
-        assert res.installation_cost == approx(179525207.856775)
+        assert res.installation_cost == approx(209403678.7623758)
 
 
 def test_steel_finance_model(cost_config):
@@ -132,7 +132,7 @@ def test_steel_finance_model(cost_config):
         costs=costs,
     )
 
-    lcos_expected = 961.2866791076059
+    lcos_expected = 1003.6498479621724
 
     res: steel.SteelFinanceModelOutputs = steel.run_steel_finance_model(config)
 
@@ -203,10 +203,9 @@ def test_run_steel_full_model(subtests):
         assert res[0].hydrogen_amount_kgpy == approx(73288888.8888889)
 
     with subtests.test("plant cost"):
-        assert res[1].total_plant_cost == approx(458597254.6437372)
-
+        assert res[1].total_plant_cost == approx(627667493.7760644)
     with subtests.test("steel price"):
-        assert res[2].sol.get("price") == approx(958.0597659101862)
+        assert res[2].sol.get("price") == approx(1000.0534906485253)
 
 
 def test_run_steel_full_model_changing_lcoh(subtests):

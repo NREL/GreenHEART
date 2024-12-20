@@ -255,8 +255,8 @@ def run_ammonia_cost_model(config: AmmoniaCostModelConfig) -> AmmoniaCostModelOu
     """
     feedstocks = config.feedstocks
 
-    model_year_CEPCI = 596.2  # TODO: what year
-    equation_year_CEPCI = 541.7  # TODO: what year
+    model_year_CEPCI = 816.0  # 2022
+    equation_year_CEPCI = 541.7  # 2016
 
     # scale with respect to a baseline plant (What is this?)
     scaling_ratio = config.plant_capacity_kgpy / (365.0 * 1266638.4)
@@ -684,7 +684,12 @@ def run_ammonia_full_model(
         plant_capacity_factor=capacity_config.input_capacity_factor_estimate,
         plant_capacity_kgpy=ammonia_capacity.ammonia_plant_capacity_kgpy,
         **ammonia_costs,
+        
     )
+    ammonia_cost_config.plant_capacity_kgpy = (
+        ammonia_capacity.ammonia_plant_capacity_kgpy
+    )
+    
     ammonia_cost_config.plant_capacity_kgpy = ammonia_capacity.ammonia_plant_capacity_kgpy
     ammonia_costs = run_ammonia_cost_model(ammonia_cost_config)
 

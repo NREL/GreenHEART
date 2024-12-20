@@ -70,9 +70,9 @@ def test_ammonia_cost_model(subtests):
     res: ammonia.AmmoniaCostModelOutputs = ammonia.run_ammonia_cost_model(config)
 
     with subtests.test("Total CapEx"):
-        assert res.capex_total == approx(74839480.74961768)
+        assert res.capex_total == approx(101241375.27767587)
     with subtests.test("Fixed OpEx"):
-        assert res.total_fixed_operating_cost == approx(10569658.376900101)
+        assert res.total_fixed_operating_cost == approx(11178044.78329158)
     with subtests.test("Variable costs"):
         assert res.variable_cost_in_startup_year == approx(4259805.969069265)
     with subtests.test("Land costs"):
@@ -107,7 +107,7 @@ def test_ammonia_finance_model():
         costs=costs,
     )
 
-    lcoa_expected = 0.9322866176899477
+    lcoa_expected = 0.9449539746141915
 
     res: ammonia.AmmoniaFinanceModelOutputs = ammonia.run_ammonia_finance_model(config)
 
@@ -188,7 +188,7 @@ def test_ammonia_full_model(subtests):
         assert res[0].ammonia_plant_capacity_kgpy == approx(334339658.8730839)
 
     with subtests.test("capex"):
-        assert res[1].capex_total == approx(71189795.03176591)
+        assert res[1].capex_total == approx(96338719.2785868)
 
     with subtests.test("LCOA"):
-        assert res[2].sol.get("price") == approx(0.934951845207612)
+        assert res[2].sol.get("price") == approx(0.9480224053339827)
