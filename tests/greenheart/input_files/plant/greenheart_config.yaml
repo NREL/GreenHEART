@@ -13,6 +13,7 @@ project_parameters:
   hybrid_electricity_estimated_cf: 0.492 #should equal 1 if grid_connection = True
   atb_year: 2025
   cost_year: 2022 # to match ATB
+  # installation_time: 0 #36 # months
 finance_parameters:
   costing_general_inflation: 0.025 # used to adjust modeled costs to cost_year
   profast_general_inflation: 0.025 # based on 2022 ATB

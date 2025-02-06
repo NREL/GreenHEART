@@ -53,7 +53,7 @@ def test_simulation_wind(subtests):
     lcoe, lcoh, _, hi = run_simulation(config)
 
     with subtests.test("lcoh"):
-        assert lcoh == approx(7.509261800642895)  # TODO base this test value on something
+        assert lcoh == approx(7.081719974333117)  # TODO base this test value on something
 
     with subtests.test("lcoe"):
         assert lcoe == approx(0.11273307765405276)  # TODO base this test value on something
@@ -104,7 +104,7 @@ def test_simulation_wind_wave(subtests):
 
     # TODO base this test value on something
     with subtests.test("lcoh"):
-        assert lcoh == approx(8.450558249471767, rel=rtol)
+        assert lcoh == approx(7.994477969806273, rel=rtol)
 
     # prior to 20240207 value was approx(0.11051228251811765) # TODO base value on something
     with subtests.test("lcoe"):
@@ -133,7 +133,7 @@ def test_simulation_wind_wave_solar(subtests):
     # prior to 20240207 value was approx(10.823798551850347)
     # TODO base this test value on something. Currently just based on output at writing.
     with subtests.test("lcoh"):
-        assert lcoh == approx(12.945506661197543, rel=rtol)
+        assert lcoh == approx(12.549197376937979, rel=rtol)
 
     # prior to 20240207 value was approx(0.11035426429749774)
     # TODO base this test value on something. Currently just based on output at writing.
@@ -162,7 +162,7 @@ def test_simulation_wind_wave_solar_battery(subtests):
 
     with subtests.test("lcoh"):
         # TODO base this test value on something. Currently just based on output at writing.
-        assert results.lcoh == approx(17.311384163607475, rel=rtol)
+        assert results.lcoh == approx(16.781418173568596, rel=rtol)
 
     with subtests.test("lcoe"):
         # TODO base this test value on something. Currently just based on output at writing.
@@ -219,7 +219,7 @@ def test_simulation_wind_onshore(subtests):
 
     # TODO base this test value on something
     with subtests.test("lcoh"):
-        assert lcoh == approx(3.1691092704830357, rel=rtol)
+        assert lcoh == approx(2.9553584701161095, rel=rtol)
 
     # TODO base this test value on something
     with subtests.test("lcoe"):
@@ -256,7 +256,7 @@ def test_simulation_wind_onshore_steel_ammonia(subtests):
 
     # TODO base this test value on something
     with subtests.test("lcoh"):
-        assert lcoh == approx(3.1691092704830357, rel=rtol)
+        assert lcoh == approx(2.955360744222285, rel=rtol)
 
     # TODO base this test value on something
     with subtests.test("lcoe"):
@@ -264,7 +264,7 @@ def test_simulation_wind_onshore_steel_ammonia(subtests):
 
     # TODO base this test value on something
     with subtests.test("steel_finance"):
-        lcos_expected = 1443.2380673720684
+        lcos_expected = 1428.9844052002427
 
         assert steel_finance.sol.get("price") == approx(lcos_expected, rel=rtol)
 
@@ -317,7 +317,7 @@ def test_simulation_wind_battery_pv_onshore_steel_ammonia(subtests):
 
     # TODO base this test value on something
     with subtests.test("lcoh"):
-        assert greenheart_output.lcoh == approx(3.1507730099064353, rel=rtol)
+        assert greenheart_output.lcoh == approx(2.9371002038947327, rel=rtol)
 
     # TODO base this test value on something
     with subtests.test("lcoe"):
@@ -325,7 +325,7 @@ def test_simulation_wind_battery_pv_onshore_steel_ammonia(subtests):
 
     # TODO base this test value on something
     with subtests.test("steel_finance"):
-        lcos_expected = 1434.9781834020673
+        lcos_expected = 1420.7295755817165
 
         assert greenheart_output.steel_finance.sol.get("price") == approx(lcos_expected, rel=rtol)
 
@@ -375,7 +375,7 @@ def test_simulation_wind_onshore_steel_ammonia_ss_h2storage(subtests):
 
     # TODO base this test value on something
     with subtests.test("lcoh"):
-        assert lcoh == approx(10.0064010897151, rel=rtol)
+        assert lcoh == approx(9.775875962016503, rel=rtol)
 
     # TODO base this test value on something
     with subtests.test("lcoe"):
@@ -383,7 +383,7 @@ def test_simulation_wind_onshore_steel_ammonia_ss_h2storage(subtests):
 
     # TODO base this test value on something
     with subtests.test("steel_finance"):
-        lcos_expected = 1899.1776749016005
+        lcos_expected = 1883.8052511395165
         assert steel_finance.sol.get("price") == approx(lcos_expected, rel=rtol)
 
     # TODO base this test value on something

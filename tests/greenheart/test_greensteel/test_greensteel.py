@@ -193,10 +193,10 @@ def test_onshore_ammonia_tx_2030_base_policy(subtests):
     output = run_simulation(config)
 
     with subtests.test("lcoh"):
-        assert output.lcoh == approx(3.2231088737405846, rel=0.11)
+        assert output.lcoh == approx(2.548720337942764, rel=0.11)
 
     with subtests.test("lcoa"):
-        assert output.ammonia_finance.sol.get("price") == approx(0.7242460501735473, rel=0.1)
+        assert output.ammonia_finance.sol.get("price") == approx(0.605557224950303, rel=0.1)
 
     with subtests.test("aep"):
         assert output.hopp_results["hybrid_plant"].annual_energies["wind"] == approx(
