@@ -44,4 +44,4 @@ if __name__ == "__main__":
 
     print("LCOE: ", lcoe, "[$/MWh]")
     print("LCOH: ", lcoh, "[$/kg]")
-    print("LCOS: ", lcos, "[$/metric-tonne]")
+    print("LCOS: ", lcos, "[$/metric ton]")

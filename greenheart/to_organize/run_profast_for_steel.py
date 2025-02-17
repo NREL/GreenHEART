@@ -24,7 +24,7 @@ def run_profast_for_steel(
     iron_ore_pellet_unitcost,
     o2_heat_integration,
 ):
-    # # Steel plant capacity in metric tonnes per year (eventually import to function)
+    # # Steel plant capacity in metric tons per year (eventually import to function)
     # plant_capacity_mtpy = 1162077
     # plant_capacity_factor = 0.9
     # levelized_cost_of_hydrogen = 10
@@ -80,7 +80,7 @@ def run_profast_for_steel(
             model_year_CEPCI / equation_year_CEPCI * 2513.08314 * plant_capacity_mtpy**0.63325
         )
         oxygen_market_price = 0  # $/kgO2
-    excess_oxygen = 395  # excess kg O2/metric tonne of steel
+    excess_oxygen = 395  # excess kg O2/metric ton of steel
     capex_piping = (
         model_year_CEPCI / equation_year_CEPCI * 11815.72718 * plant_capacity_mtpy**0.59983
     )
@@ -125,26 +125,24 @@ def run_profast_for_steel(
 
     # -------------------------- Feedstock and Waste Costs -------------------------
 
-    maintenance_materials_unitcost = (
-        7.72  # $/metric tonne of annual steel slab production at real CF
-    )
-    raw_water_unitcost = 0.59289  # $/metric tonne of raw water
-    lime_unitcost = lime_unitcost  # $/metric tonne of lime
-    carbon_unitcost = carbon_unitcost  # $/metric tonne of Carbon
-    slag_disposal_unitcost = 37.63  # $ metric tonne of Slag
+    maintenance_materials_unitcost = 7.72  # $/metric ton of annual steel slab production at real CF
+    raw_water_unitcost = 0.59289  # $/metric ton of raw water
+    lime_unitcost = lime_unitcost  # $/metric ton of lime
+    carbon_unitcost = carbon_unitcost  # $/metric ton of Carbon
+    slag_disposal_unitcost = 37.63  # $ metric ton of Slag
     iron_ore_pellet_unitcost = iron_ore_pellet_unitcost  # $/metric tone of Ore
 
     # ---------------Feedstock Consumtion and Waste/Emissions Production-----------
 
-    iron_ore_consumption = 1.62927  # metric tonnes of iron ore/metric tonne of steel production
-    raw_water_consumption = 0.80367  # metric tonnes of raw water/metric tonne of steel production
-    lime_consumption = 0.01812  # metric tonnes of lime/metric tonne of steel production
-    carbon_consumption = 0.0538  # metric tonnes of carbon/metric tonne of steel production
-    hydrogen_consumption = 0.06596  # metric tonnes of hydrogen/metric tonne of steel production
-    natural_gas_consumption = 0.71657  # GJ-LHV/metric tonne of steel production
-    electricity_consumption = 0.5502  # MWh/metric tonne of steel production
+    iron_ore_consumption = 1.62927  # metric tons of iron ore/metric ton of steel production
+    raw_water_consumption = 0.80367  # metric tons of raw water/metric ton of steel production
+    lime_consumption = 0.01812  # metric tons of lime/metric ton of steel production
+    carbon_consumption = 0.0538  # metric tons of carbon/metric ton of steel production
+    hydrogen_consumption = 0.06596  # metric tons of hydrogen/metric ton of steel production
+    natural_gas_consumption = 0.71657  # GJ-LHV/metric ton of steel production
+    electricity_consumption = 0.5502  # MWh/metric ton of steel production
 
-    slag_production = 0.17433  # metric tonnes of slag/metric tonne of steel production
+    slag_production = 0.17433  # metric tons of slag/metric ton of steel production
 
     # ---------------------- Owner's (Installation) Costs --------------------------
     labor_cost_fivemonth = (
@@ -221,7 +219,7 @@ def run_profast_for_steel(
         "commodity",
         {
             "name": "Steel",
-            "unit": "metric tonnes",
+            "unit": "metric tons",
             "initial price": 1000,
             "escalation": gen_inflation,
         },
@@ -379,63 +377,63 @@ def run_profast_for_steel(
     pf.add_feedstock(
         name="Maintenance Materials",
         usage=1.0,
-        unit="Units per metric tonne of steel",
+        unit="Units per metric ton of steel",
         cost=maintenance_materials_unitcost,
         escalation=gen_inflation,
     )
     pf.add_feedstock(
         name="Raw Water Withdrawal",
         usage=raw_water_consumption,
-        unit="metric tonnes of water per metric tonne of steel",
+        unit="metric tons of water per metric ton of steel",
         cost=raw_water_unitcost,
         escalation=gen_inflation,
     )
     pf.add_feedstock(
         name="Lime",
         usage=lime_consumption,
-        unit="metric tonnes of lime per metric tonne of steel",
+        unit="metric tons of lime per metric ton of steel",
         cost=lime_unitcost,
         escalation=gen_inflation,
     )
     pf.add_feedstock(
         name="Carbon",
         usage=carbon_consumption,
-        unit="metric tonnes of carbon per metric tonne of steel",
+        unit="metric tons of carbon per metric ton of steel",
         cost=carbon_unitcost,
         escalation=gen_inflation,
     )
     pf.add_feedstock(
         name="Iron Ore",
         usage=iron_ore_consumption,
-        unit="metric tonnes of iron ore per metric tonne of steel",
+        unit="metric tons of iron ore per metric ton of steel",
         cost=iron_ore_pellet_unitcost,
         escalation=gen_inflation,
     )
     pf.add_feedstock(
         name="Hydrogen",
         usage=hydrogen_consumption,
-        unit="metric tonnes of hydrogen per metric tonne of steel",
+        unit="metric tons of hydrogen per metric ton of steel",
         cost=levelized_cost_of_hydrogen * 1000,
         escalation=gen_inflation,
     )
     pf.add_feedstock(
         name="Natural Gas",
         usage=natural_gas_consumption,
-        unit="GJ-LHV per metric tonne of steel",
+        unit="GJ-LHV per metric ton of steel",
         cost=natural_gas_cost / 1.05505585,
         escalation=gen_inflation,
     )
     pf.add_feedstock(
         name="Electricity",
         usage=electricity_consumption,
-        unit="MWh per metric tonne of steel",
+        unit="MWh per metric ton of steel",
         cost=grid_prices_interpolated_USDperMWh,
         escalation=gen_inflation,
     )
     pf.add_feedstock(
         name="Slag Disposal",
         usage=slag_production,
-        unit="metric tonnes of slag per metric tonne of steel",
+        unit="metric tons of slag per metric ton of steel",
         cost=slag_disposal_unitcost,
         escalation=gen_inflation,
     )
@@ -443,7 +441,7 @@ def run_profast_for_steel(
     pf.add_coproduct(
         name="Oxygen sales",
         usage=excess_oxygen,
-        unit="kg O2 per metric tonne of steel",
+        unit="kg O2 per metric ton of steel",
         cost=oxygen_market_price,
         escalation=gen_inflation,
     )
@@ -453,7 +451,7 @@ def run_profast_for_steel(
     #     pf.addfeedstock(
     #         name="Oxygen Sales",
     #         usage=excess_oxygen,
-    #         unit="kilograms of oxygen per metric tonne of steel",
+    #         unit="kilograms of oxygen per metric ton of steel",
     #         cost=-oxygen_market_price,
     #         escalation=gen_inflation,
     #     )
@@ -630,34 +628,34 @@ def run_profast_for_steel(
 
     bos_savings = (price_breakdown_labor_cost_admin_support) * 0.3
     steel_price_breakdown = {
-        "Steel price: EAF and Casting CAPEX ($/tonne)": price_breakdown_eaf_casting,
-        "Steel price: Shaft Furnace CAPEX ($/tonne)": price_breakdown_shaft_furnace,
-        "Steel price: Oxygen Supply CAPEX ($/tonne)": price_breakdown_oxygen_supply,
-        "Steel price: H2 Pre-heating CAPEX ($/tonne)": price_breakdown_h2_preheating,
-        "Steel price: Cooling Tower CAPEX ($/tonne)": price_breakdown_cooling_tower,
-        "Steel price: Piping CAPEX ($/tonne)": price_breakdown_piping,
-        "Steel price: Electrical & Instrumentation ($/tonne)": price_breakdown_elec_instr,
-        "Steel price: Buildings, Storage, Water Service CAPEX ($/tonne)": price_breakdown_buildings_storage_water,  # noqa: E501
-        "Steel price: Miscellaneous CAPEX ($/tonne)": price_breakdown_misc,
-        "Steel price: Annual Operating Labor Cost ($/tonne)": price_breakdown_labor_cost_annual,
-        "Steel price: Maintenance Labor Cost ($/tonne)": price_breakdown_labor_cost_maintenance,
-        "Steel price: Administrative & Support Labor Cost ($/tonne)": price_breakdown_labor_cost_admin_support,  # noqa: E501
-        "Steel price: Installation Cost ($/tonne)": price_breakdown_installation,
-        "Steel price: Maintenance Materials ($/tonne)": price_breakdown_maintenance_materials,
-        "Steel price: Raw Water Withdrawal ($/tonne)": price_breakdown_water_withdrawal,
-        "Steel price: Lime ($/tonne)": price_breakdown_lime,
-        "Steel price: Carbon ($/tonne)": price_breakdown_carbon,
-        "Steel price: Iron Ore ($/tonne)": price_breakdown_iron_ore,
-        "Steel price: Hydrogen ($/tonne)": price_breakdown_hydrogen,
-        "Steel price: Natural gas ($/tonne)": price_breakdown_natural_gas,
-        "Steel price: Electricity ($/tonne)": price_breakdown_electricity,
-        "Steel price: Slag Disposal ($/tonne)": price_breakdown_slag,
-        "Steel price: Taxes ($/tonne)": price_breakdown_taxes,
-        "Steel price: Equipment Financing ($/tonne)": price_breakdown_financial_equipment,
-        "Steel price: Remaining Financial ($/tonne)": price_breakdown_financial_remaining,
-        "Steel price: Oxygen sales ($/tonne)": price_breakdown_O2sales,
-        "Steel price: Total ($/tonne)": price_breakdown_check,
-        "(-) Steel price: BOS savings ($/tonne)": bos_savings,
+        "Steel price: EAF and Casting CAPEX ($/metric ton)": price_breakdown_eaf_casting,
+        "Steel price: Shaft Furnace CAPEX ($/metric ton)": price_breakdown_shaft_furnace,
+        "Steel price: Oxygen Supply CAPEX ($/metric ton)": price_breakdown_oxygen_supply,
+        "Steel price: H2 Pre-heating CAPEX ($/metric ton)": price_breakdown_h2_preheating,
+        "Steel price: Cooling Tower CAPEX ($/metric ton)": price_breakdown_cooling_tower,
+        "Steel price: Piping CAPEX ($/metric ton)": price_breakdown_piping,
+        "Steel price: Electrical & Instrumentation ($/metric ton)": price_breakdown_elec_instr,
+        "Steel price: Buildings, Storage, Water Service CAPEX ($/metric ton)": price_breakdown_buildings_storage_water,  # noqa: E501
+        "Steel price: Miscellaneous CAPEX ($/metric ton)": price_breakdown_misc,
+        "Steel price: Annual Operating Labor Cost ($/metric ton)": price_breakdown_labor_cost_annual,  # noqa: E501
+        "Steel price: Maintenance Labor Cost ($/metric ton)": price_breakdown_labor_cost_maintenance,  # noqa: E501
+        "Steel price: Administrative & Support Labor Cost ($/metric ton)": price_breakdown_labor_cost_admin_support,  # noqa: E501
+        "Steel price: Installation Cost ($/metric ton)": price_breakdown_installation,
+        "Steel price: Maintenance Materials ($/metric ton)": price_breakdown_maintenance_materials,
+        "Steel price: Raw Water Withdrawal ($/metric ton)": price_breakdown_water_withdrawal,
+        "Steel price: Lime ($/metric ton)": price_breakdown_lime,
+        "Steel price: Carbon ($/metric ton)": price_breakdown_carbon,
+        "Steel price: Iron Ore ($/metric ton)": price_breakdown_iron_ore,
+        "Steel price: Hydrogen ($/metric ton)": price_breakdown_hydrogen,
+        "Steel price: Natural gas ($/metric ton)": price_breakdown_natural_gas,
+        "Steel price: Electricity ($/metric ton)": price_breakdown_electricity,
+        "Steel price: Slag Disposal ($/metric ton)": price_breakdown_slag,
+        "Steel price: Taxes ($/metric ton)": price_breakdown_taxes,
+        "Steel price: Equipment Financing ($/metric ton)": price_breakdown_financial_equipment,
+        "Steel price: Remaining Financial ($/metric ton)": price_breakdown_financial_remaining,
+        "Steel price: Oxygen sales ($/metric ton)": price_breakdown_O2sales,
+        "Steel price: Total ($/metric ton)": price_breakdown_check,
+        "(-) Steel price: BOS savings ($/metric ton)": bos_savings,
     }
 
     price_breakdown = price_breakdown.drop(columns=["index", "Amount"])

@@ -50,7 +50,7 @@ class PressureVessel:
     ):
         ########Key inputs##########
         self.Wind_avai = Wind_avai  # Wind availability in %
-        self.H2_flow = H2_flow  # Flow rate of steel plants in tonne/day
+        self.H2_flow = H2_flow  # Flow rate of steel plants in metric ton/day
 
         # NOTE: Charge/discharge ratio, i.e. 2 means the charging is 2x faster than discharge
         self.cdratio = cdratio

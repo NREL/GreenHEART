@@ -86,7 +86,7 @@ if __name__ == "__main__":
     ax[1].scatter(rating_mw, np.multiply(mass_kg, 1e-3), label="Data points")
 
     ax[1].plot(ratings, mass(ratings) * 1e-3, label="Linear Fit")
-    ax[1].set(xlabel="Electrolyzer Rating (MW)", ylabel="Mass (tonnes)")
+    ax[1].set(xlabel="Electrolyzer Rating (MW)", ylabel="Mass (metric tons)")
     ax[1].legend(frameon=False)
     plt.tight_layout()
     plt.show()

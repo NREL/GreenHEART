@@ -2177,9 +2177,9 @@ def write_outputs_RODeO(
             "LCOH: Bulk H2 Transmission ($/kg)",
             "LCOH: Renewable PTC Reduction ($/kg)",
             "LCOH: H2PTC Reduction ($/kg)",
-            "Steel annual production (tonne/year)",
+            "Steel annual production (metric ton/year)",
             "Ammonia annual production (kg/year)",
-            "Steel Price with Integration ($/tonne)",
+            "Steel Price with Integration ($/metric ton)",
         ],
     )
 
@@ -2579,11 +2579,11 @@ def write_outputs_ProFAST(
             "LCOH: Water consumption ($/kg)",
             "LCOH: Grid electricity ($/kg)",
             "LCOH: Bulk H2 Transmission ($/kg)",
-            "Steel annual production (tonne/year)",
+            "Steel annual production (metric ton/year)",
             "Steel annual capacity margin (%)",
             "Ammonia annual production (kg/year)",
             "Ammonia annual capacity margin (%)",
-            "Steel Price with Integration ($/tonne)",
+            "Steel Price with Integration ($/metric ton)",
         ],
     )
 
@@ -2724,7 +2724,7 @@ def write_outputs_ProFAST_SMR(
             "LCOH: Taxes ($/kg)",
             "LCOH: Water charges ($/kg)",
             "LCOH: Financial ($/kg)",
-            "Steel annual production (tonne steel/year)",
+            "Steel annual production (metric ton steel/year)",
             "Ammonia annual production (kgNH3/year)",
         ],
     )
@@ -2792,7 +2792,7 @@ def steel_LCOS(
     steel_plant_life = 30
 
     hydrogen_consumption_for_steel = (
-        0.06596  # metric tonnes of hydrogen/metric tonne of steel production
+        0.06596  # metric tons of hydrogen/metric ton of steel production
     )
     # Could be good to make this more conservative, but probably fine if demand profile is flat
 
@@ -2916,7 +2916,7 @@ def steel_LCOS_SMR(
     # Steel production break-even price analysis
 
     hydrogen_consumption_for_steel = (
-        0.06596  # metric tonnes of hydrogen/metric tonne of steel productio
+        0.06596  # metric tons of hydrogen/metric ton of steel productio
     )
     # Could be good to make this more conservative, but probably fine if demand profile is flat
     max_steel_production_capacity_mtpy = (
@@ -3577,7 +3577,7 @@ def hydrogen_storage_capacity_cost_calcs(H2_Results, electrolyzer_size_mw, stora
             status_message = (
                 "Hydrogen storage model complete.\nStorage capacity: "
                 + str(hydrogen_storage_capacity_kg / 1000)
-                + " metric tonnes. \nStorage cost: "
+                + " metric tons. \nStorage cost: "
                 + str(storage_cost_USDprkg)
                 + " $/kg"
             )
@@ -3586,7 +3586,7 @@ def hydrogen_storage_capacity_cost_calcs(H2_Results, electrolyzer_size_mw, stora
             status_message = (
                 "Hydrogen storage model complete.\nStorage capacity: "
                 + str(hydrogen_storage_capacity_kg / 1000)
-                + " metric tonnes. \nStorage cost: "
+                + " metric tons. \nStorage cost: "
                 + str(storage_cost_USDprkg)
                 + " $/kg"
             )
@@ -3614,7 +3614,7 @@ def hydrogen_storage_capacity_cost_calcs(H2_Results, electrolyzer_size_mw, stora
             status_message = (
                 "Hydrogen storage model complete.\nStorage capacity: "
                 + str(hydrogen_storage_capacity_kg / 1000)
-                + " metric tonnes. \nStorage cost: "
+                + " metric tons. \nStorage cost: "
                 + str(storage_cost_USDprkg)
                 + " $/kg"
             )
@@ -3642,7 +3642,7 @@ def hydrogen_storage_capacity_cost_calcs(H2_Results, electrolyzer_size_mw, stora
             status_message = (
                 "Hydrogen storage model complete.\nStorage capacity: "
                 + str(hydrogen_storage_capacity_kg / 1000)
-                + " metric tonnes. \nStorage cost: "
+                + " metric tons. \nStorage cost: "
                 + str(storage_cost_USDprkg)
                 + " $/kg"
             )
@@ -3665,7 +3665,7 @@ def hydrogen_storage_capacity_cost_calcs(H2_Results, electrolyzer_size_mw, stora
             status_message = (
                 f"Error: Please enter a valid hydrogen storage type. Otherwise, assuming buried"
                 f" pipe (location agnostic) hydrogen storage.\nStorage capacity:"
-                f" {hydrogen_storage_capacity_kg / 1000} metric tonnes. \nStorage"
+                f" {hydrogen_storage_capacity_kg / 1000} metric tons. \nStorage"
                 f" cost: {storage_cost_USDprkg} $/kg"
             )
     if hydrogen_storage_capacity_MWh_HHV == 0:

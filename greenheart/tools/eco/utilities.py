@@ -1621,10 +1621,10 @@ def calculate_lca(
     ## GREET Data
     # Define conversions
     g_to_kg = 0.001  # 1 g = 0.001 kg
-    MT_to_kg = 1000  # 1 metric tonne = 1000 kg
+    MT_to_kg = 1000  # 1 metric ton = 1000 kg
     kWh_to_MWh = 0.001  # 1 kWh = 0.001 MWh
     MWh_to_kWh = 1000  # 1 MWh = 1000 kWh
-    gal_H2O_to_MT = 0.00378541  # 1 US gallon of H2O = 0.00378541 metric tonnes
+    gal_H2O_to_MT = 0.00378541  # 1 US gallon of H2O = 0.00378541 metric tons
 
     # Instantiate GreetData class object, parse greet if not already parsed
     # return class object and load data dictionary
@@ -1791,7 +1791,7 @@ def calculate_lca(
     NH3_NG_consume = greet_data_dict[
         "NH3_NG_consume"
     ]  # Natural gas consumption for combustion in the Haber-Bosch process / Boiler for Ammonia
-    # production (MJ/metric tonne NH3)
+    # production (MJ/metric ton NH3)
     NH3_H2_consume = greet_data_dict[
         "NH3_H2_consume"
     ]  # Gaseous Hydrogen consumption for Ammonia production, based on chemical balance and is
@@ -1810,19 +1810,19 @@ def calculate_lca(
     # iron_ore_mining_EI_per_MT_steel = greet_data_dict[
     #     "DRI_iron_ore_mining_EI_per_MT_steel"
     # ]  # GHG Emissions Intensity of Iron ore mining for use in DRI-EAF Steel production
-    # # (kg CO2e/metric tonne steel produced)
+    # # (kg CO2e/metric ton steel produced)
     iron_ore_mining_EI_per_MT_ore = greet_data_dict[
         "DRI_iron_ore_mining_EI_per_MT_ore"
     ]  # GHG Emissions Intensity of Iron ore mining for use in DRI-EAF Steel production
-    # (kg CO2e/metric tonne iron ore)
+    # (kg CO2e/metric ton iron ore)
     # iron_ore_pelletizing_EI_per_MT_steel = greet_data_dict[
     #     "DRI_iron_ore_pelletizing_EI_per_MT_steel"
     # ]  # GHG Emissions Intensity of Iron ore pelletizing for use in DRI-EAF Steel production
-    # # (kg CO2e/metric tonne steel produced)
+    # # (kg CO2e/metric ton steel produced)
     iron_ore_pelletizing_EI_per_MT_ore = greet_data_dict[
         "DRI_iron_ore_pelletizing_EI_per_MT_ore"
     ]  # GHG Emissions Intensity of Iron ore pelletizing for use in DRI-EAF Steel production
-    # (kg CO2e/metric tonne iron ore)
+    # (kg CO2e/metric ton iron ore)
 
     # NOTE: in future if accounting for different steel productin processes (DRI-EAF vs XYZ),
     # then add if statement to check greenheart_config for steel production process and
@@ -1831,27 +1831,27 @@ def calculate_lca(
         "steel_H2O_consume"
     ]  # Total H2O consumption for DRI-EAF Steel production w/ 83% H2 and 0% scrap, accounts for
     # water used in iron ore mining, pelletizing, DRI, and EAF
-    # (metric tonne H2O/metric tonne steel production)
+    # (metric ton H2O/metric ton steel production)
     steel_H2_consume = greet_data_dict[
         "steel_H2_consume"
     ]  # Hydrogen consumption for DRI-EAF Steel production w/ 83% H2 regardless of scrap
-    # (metric tonnes H2/metric tonne steel production)
+    # (metric tons H2/metric ton steel production)
     steel_NG_consume = greet_data_dict[
         "steel_NG_consume"
     ]  # Natural gas consumption for DRI-EAF Steel production accounting for DRI with 83% H2,
-    # and EAF + LRF (GJ/metric tonne steel)
+    # and EAF + LRF (GJ/metric ton steel)
     steel_electricity_consume = greet_data_dict[
         "steel_electricity_consume"
     ]  # Total Electrical Energy consumption for DRI-EAF Steel production accounting for
-    # DRI with 83% H2 and EAF + LRF (MWh/metric tonne steel production)
+    # DRI with 83% H2 and EAF + LRF (MWh/metric ton steel production)
     steel_iron_ore_consume = greet_data_dict[
         "steel_iron_ore_consume"
     ]  # Iron ore consumption for DRI-EAF Steel production
-    # (metric tonne iron ore/metric tonne steel production)
+    # (metric ton iron ore/metric ton steel production)
     steel_lime_consume = greet_data_dict[
         "steel_lime_consume"
     ]  # Lime consumption for DRI-EAF Steel production
-    # (metric tonne lime/metric tonne steel production)
+    # (metric ton lime/metric ton steel production)
 
     ## Cambium
     # Define cambium_year
@@ -2056,7 +2056,7 @@ def calculate_lca(
                 + EI_values["NH3_electrolysis_Scope3_EI"]
             )
 
-            # Calculate steel emissions via hybrid grid electrolysis (kg CO2e/metric tonne steel)
+            # Calculate steel emissions via hybrid grid electrolysis (kg CO2e/metric ton steel)
             EI_values["steel_electrolysis_Scope3_EI"] = (
                 (steel_H2_consume * MT_to_kg * EI_values["electrolysis_Total_EI"])
                 + (steel_lime_consume * lime_supply_EI * MT_to_kg)
@@ -2130,7 +2130,7 @@ def calculate_lca(
                 + EI_values["NH3_electrolysis_Scope3_EI"]
             )
 
-            # Calculate steel emissions via grid only electrolysis (kg CO2e/metric tonne steel)
+            # Calculate steel emissions via grid only electrolysis (kg CO2e/metric ton steel)
             EI_values["steel_electrolysis_Scope3_EI"] = (
                 (steel_H2_consume * MT_to_kg * EI_values["electrolysis_Total_EI"])
                 + (steel_lime_consume * lime_supply_EI * MT_to_kg)
@@ -2201,7 +2201,7 @@ def calculate_lca(
                 + EI_values["NH3_smr_Scope3_EI"]
             )
 
-            # Calculate steel emissions via SMR process (kg CO2e/metric tonne steel)
+            # Calculate steel emissions via SMR process (kg CO2e/metric ton steel)
             EI_values["steel_smr_Scope3_EI"] = (
                 (steel_H2_consume * MT_to_kg * EI_values["smr_Total_EI"])
                 + (steel_lime_consume * lime_supply_EI * MT_to_kg)
@@ -2276,7 +2276,7 @@ def calculate_lca(
                 + EI_values["NH3_smr_ccs_Scope3_EI"]
             )
 
-            # Calculate steel emissions via SMR with CCS process (kg CO2e/metric tonne steel)
+            # Calculate steel emissions via SMR with CCS process (kg CO2e/metric ton steel)
             EI_values["steel_smr_ccs_Scope3_EI"] = (
                 (steel_H2_consume * MT_to_kg * EI_values["smr_ccs_Total_EI"])
                 + (steel_lime_consume * lime_supply_EI * MT_to_kg)
@@ -2345,7 +2345,7 @@ def calculate_lca(
                 + EI_values["NH3_atr_Scope3_EI"]
             )
 
-            # Calculate steel emissions via ATR process (kg CO2e/metric tonne steel)
+            # Calculate steel emissions via ATR process (kg CO2e/metric ton steel)
             EI_values["steel_atr_Scope3_EI"] = (
                 (steel_H2_consume * MT_to_kg * EI_values["atr_Total_EI"])
                 + (steel_lime_consume * lime_supply_EI * MT_to_kg)
@@ -2417,7 +2417,7 @@ def calculate_lca(
                 + EI_values["NH3_atr_ccs_Scope3_EI"]
             )
 
-            # Calculate steel emissions via ATR with CCS process (kg CO2e/metric tonne steel)
+            # Calculate steel emissions via ATR with CCS process (kg CO2e/metric ton steel)
             EI_values["steel_atr_ccs_Scope3_EI"] = (
                 (steel_H2_consume * MT_to_kg * EI_values["atr_ccs_Total_EI"])
                 + (steel_lime_consume * lime_supply_EI * MT_to_kg)
@@ -2489,7 +2489,7 @@ def calculate_lca(
                 + EI_values["NH3_electrolysis_Scope3_EI"]
             )
 
-            # Calculate steel emissions via renewable electrolysis (kg CO2e/metric tonne steel)
+            # Calculate steel emissions via renewable electrolysis (kg CO2e/metric ton steel)
             EI_values["steel_electrolysis_Scope3_EI"] = (
                 (steel_H2_consume * MT_to_kg * EI_values["electrolysis_Total_EI"])
                 + (steel_lime_consume * lime_supply_EI * MT_to_kg)

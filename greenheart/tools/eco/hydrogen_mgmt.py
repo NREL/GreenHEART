@@ -480,7 +480,7 @@ def run_h2_storage(
         print("H2 storage capex: ${:,.0f}".format(h2_storage_results["storage_capex"]))
         print("H2 storage annual opex: ${:,.0f}/yr".format(h2_storage_results["storage_opex"]))
         print(
-            "H2 storage capacity (tonnes): ",
+            "H2 storage capacity (metric tons): ",
             h2_storage_results["h2_storage_capacity_kg"] / 1000,
         )
         if h2_storage_results["h2_storage_capacity_kg"] > 0:
@@ -503,7 +503,7 @@ def run_equipment_platform(
     desal_results,
     verbose=False,
 ):
-    topmass = 0.0  # tonnes
+    topmass = 0.0  # metric tons
     toparea = 0.0  # m^2
 
     if (
@@ -516,8 +516,10 @@ def run_equipment_platform(
         "equipment_footprint_m2": desal_size_m2"""
 
         if design_scenario["electrolyzer_location"] == "platform":
-            topmass += electrolyzer_physics_results["equipment_mass_kg"] * 1e-3  # from kg to tonnes
-            topmass += desal_results["equipment_mass_kg"] * 1e-3  # from kg to tonnes
+            topmass += (
+                electrolyzer_physics_results["equipment_mass_kg"] * 1e-3
+            )  # from kg to metric tons
+            topmass += desal_results["equipment_mass_kg"] * 1e-3  # from kg to metric tons
             toparea += electrolyzer_physics_results["equipment_footprint_m2"]
             toparea += desal_results["equipment_footprint_m2"]
 
@@ -525,7 +527,7 @@ def run_equipment_platform(
             design_scenario["h2_storage_location"] == "platform"
             and greenheart_config["h2_storage"]["type"] != "none"
         ):
-            topmass += h2_storage_results["tank_mass_full_kg"] * 1e-3  # from kg to tonnes
+            topmass += h2_storage_results["tank_mass_full_kg"] * 1e-3  # from kg to metric tons
             toparea += h2_storage_results["tank_footprint_m2"]
 
         if (
@@ -595,7 +597,7 @@ def run_equipment_platform(
     platform_results = {
         "topmass_kg": topmass,
         "toparea_m2": platform_area,
-        "platform_mass_tonnes": platform_mass,
+        "platform_mass_metric tons": platform_mass,
         "capex": total_capex,
         "opex": total_opex,
     }

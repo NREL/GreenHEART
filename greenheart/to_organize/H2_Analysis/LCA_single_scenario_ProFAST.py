@@ -39,7 +39,7 @@ def hydrogen_LCA_singlescenario_ProFAST(
     # DATA
     # ==============================================================================
     # Conversions
-    kg_to_MT_conv = 0.001  # Converion from kg to metric tonnes
+    kg_to_MT_conv = 0.001  # Converion from kg to metric tons
 
     # ------------------------------------------------------------------------------
     # Renewable infrastructure embedded emission intensities

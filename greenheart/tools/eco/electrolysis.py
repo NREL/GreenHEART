@@ -116,15 +116,15 @@ def run_electrolyzer_physics(
     if verbose:
         print("\nElectrolyzer Physics:")  # 61837444.34555772 145297297.29729727
         print(
-            "H2 Produced Annually (tonnes): ",
+            "H2 Produced Annually (metric tons): ",
             H2_Results["Life: Annual H2 production [kg/year]"] * 1e-3,
         )
         print(
-            "Max H2 hourly (tonnes): ",
+            "Max H2 hourly (metric tons): ",
             max(H2_Results["Hydrogen Hourly Production [kg/hr]"]) * 1e-3,
         )
         print(
-            "Max H2 daily (tonnes): ",
+            "Max H2 daily (metric tons): ",
             max(
                 np.convolve(
                     H2_Results["Hydrogen Hourly Production [kg/hr]"],
@@ -144,7 +144,7 @@ def run_electrolyzer_physics(
         )
         print("Max hourly based on est kg/kWh (kg): ", max(roughest))
         print(
-            "Max daily rough est (tonnes): ",
+            "Max daily rough est (metric tons): ",
             max(np.convolve(roughest, np.ones(24), mode="valid")) * 1e-3,
         )
         print(
@@ -224,7 +224,7 @@ def run_electrolyzer_physics(
         tick_spacing = 2
         ax[2, 0].set(
             xlabel="Hour",
-            ylabel="Hydrogen\n(tonnes/hr)",
+            ylabel="Hydrogen\n(metric tons/hr)",
             # ylim=[0, 7000],
             xlim=[0, len(H2_Results["Hydrogen Hourly Production [kg/hr]"])],
         )

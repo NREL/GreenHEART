@@ -1,7 +1,7 @@
 # Compressed gas storage for wind-H2-steel project
 - Author: Peng Peng (ppeng@lbl.gov)
 - Date: 10/21/2022
-- Brief description: This script is for a high-level overall estimation of energy consumption for compressed gas H2 storage for a steel facility requiring 200 tonnes of hydrogen per day.
+- Brief description: This script is for a high-level overall estimation of energy consumption for compressed gas H2 storage for a steel facility requiring 200 metric tons of hydrogen per day.
 
 ## Required files:
 1.	Compressed_all.py
@@ -28,7 +28,7 @@
 3.	Change inputs and run Compressed_all.py
 
 ## Notes:
-1.	Max storage capacity obtained from empirical relation from another project for 200 tonne/day H2 flow into steel facility. See below. And is assumed to scale linearly with the steel facility.
+1.	Max storage capacity obtained from empirical relation from another project for 200 metric ton/day H2 flow into steel facility. See below. And is assumed to scale linearly with the steel facility.
     - ![](images/2022-11-18-15-31-54.png)
 2.	Operation cost does not include electrolyzer.
 3.	Costs include the following dummy values, which can be changed later in the “Economic parameters” section (around line 64) in Compressed_gas_function.py

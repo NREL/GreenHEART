@@ -35,7 +35,7 @@ def hydrogen_LCA_singlescenario(
     # ==============================================================================
     # Conversions
     g_to_kg_conv = 0.001  # Conversion from grams to kilograms
-    kg_to_MT_conv = 0.001  # Converion from kg to metric tonnes
+    kg_to_MT_conv = 0.001  # Converion from kg to metric tons
 
     # ------------------------------------------------------------------------------
     # Renewable infrastructure embedded emission intensities

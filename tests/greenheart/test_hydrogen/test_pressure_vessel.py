@@ -44,12 +44,12 @@ class TestPressureVessel:
         assert self.pressure_vessel_instance.c_fit_opex == approx(17.538017086792006)
 
     def test_energy_fit(self):
-        capacity = 1e6  # 1000 tonnes h2
+        capacity = 1e6  # 1000 metric tons h2
         _, _, energy_per_kg = self.pressure_vessel_instance.calculate_from_fit(capacity_kg=capacity)
         assert energy_per_kg == approx(2.688696, 1e-5)  # kWh/kg
 
     def test_compare_price_change_capex(self):
-        capacity = 1e6  # 1000 tonnes h2
+        capacity = 1e6  # 1000 metric tons h2
         capex_07, _, _ = self.pressure_vessel_instance.calculate_from_fit(capacity_kg=capacity)
         capex_00, _, _ = self.pressure_vessel_instance_no_cost.calculate_from_fit(
             capacity_kg=capacity
@@ -58,7 +58,7 @@ class TestPressureVessel:
         assert capex_00 == capex_07
 
     def test_compare_price_change_opex(self):
-        capacity = 1e6  # 1000 tonnes h2
+        capacity = 1e6  # 1000 metric tons h2
         _, opex_07, _ = self.pressure_vessel_instance.calculate_from_fit(capacity_kg=capacity)
         _, opex_00, _ = self.pressure_vessel_instance_no_cost.calculate_from_fit(
             capacity_kg=capacity
@@ -67,7 +67,7 @@ class TestPressureVessel:
         assert opex_00 < opex_07
 
     def test_compare_price_change_energy(self):
-        capacity = 1e6  # 1000 tonnes h2
+        capacity = 1e6  # 1000 metric tons h2
         _, _, energy_per_kg_07 = self.pressure_vessel_instance.calculate_from_fit(
             capacity_kg=capacity
         )
@@ -263,7 +263,7 @@ class PlotTestPressureVessel:
         ax[1, 1].set(ylabel="OPEX_div/OPEX_cent", ylim=[0, 4])
 
         for axi in ax[1]:
-            axi.set(xlabel="H$_2$ Capacity (tonnes)")
+            axi.set(xlabel="H$_2$ Capacity (metric tons)")
         ax[1, 1].legend()
 
         plt.tight_layout()

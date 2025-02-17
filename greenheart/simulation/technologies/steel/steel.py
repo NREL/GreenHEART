@@ -20,55 +20,55 @@ class Feedstocks:
         excess_oxygen (float):
             Excess oxygen produced (kgO2), default = 395.
         lime_unitcost (float):
-            Cost per metric tonne of lime ($/metric tonne).
+            Cost per metric ton of lime ($/metric ton).
         lime_transport_cost (float):
-            Cost to transport lime per metric tonne of lime ($/metric tonne).
+            Cost to transport lime per metric ton of lime ($/metric ton).
         carbon_unitcost (float):
-            Cost per metric tonne of carbon ($/metric tonne).
+            Cost per metric ton of carbon ($/metric ton).
         carbon_transport_cost (float):
-            Cost to transport carbon per metric tonne of carbon ($/metric tonne).
+            Cost to transport carbon per metric ton of carbon ($/metric ton).
         electricity_cost (float):
-            Electricity cost per metric tonne of steel production ($/metric tonne).
+            Electricity cost per metric ton of steel production ($/metric ton).
         iron_ore_pellet_unitcost (float):
-            Cost per metric tonne of iron ore ($/metric tonne).
+            Cost per metric ton of iron ore ($/metric ton).
         iron_ore_pellet_transport_cost (float):
-            Cost to transport iron ore per metric tonne of iron ore ($/metric tonne).
+            Cost to transport iron ore per metric ton of iron ore ($/metric ton).
         oxygen_market_price (float):
             Market price per kg of oxygen ($/kgO2).
         raw_water_unitcost (float):
-            Cost per metric tonne of raw water ($/metric tonne).
+            Cost per metric ton of raw water ($/metric ton).
         iron_ore_consumption (float):
-            Iron ore consumption per metric tonne of steel production (metric tonnes).
+            Iron ore consumption per metric ton of steel production (metric tons).
         raw_water_consumption (float):
-            Raw water consumption per metric tonne of steel production (metric tonnes).
+            Raw water consumption per metric ton of steel production (metric tons).
         lime_consumption (float):
-            Lime consumption per metric tonne of steel production (metric tonnes).
+            Lime consumption per metric ton of steel production (metric tons).
         carbon_consumption (float):
-            Carbon consumption per metric tonne of steel production (metric tonnes).
+            Carbon consumption per metric ton of steel production (metric tons).
         hydrogen_consumption (float):
-            Hydrogen consumption per metric tonne of steel production (metric tonnes).
+            Hydrogen consumption per metric ton of steel production (metric tons).
         natural_gas_consumption (float):
-            Natural gas consumption per metric tonne of steel production (GJ-LHV).
+            Natural gas consumption per metric ton of steel production (GJ-LHV).
         electricity_consumption (float):
-            Electricity consumption per metric tonne of steel production (MWh).
+            Electricity consumption per metric ton of steel production (MWh).
         slag_disposal_unitcost (float):
-            Cost per metric tonne of slag disposal ($/metric tonne).
+            Cost per metric ton of slag disposal ($/metric ton).
         slag_production (float):
-            Slag production per metric tonne of steel production (metric tonnes).
+            Slag production per metric ton of steel production (metric tons).
         maintenance_materials_unitcost (float):
-            Cost per metric tonne of annual steel slab production at real capacity
-            factor ($/metric tonne).
+            Cost per metric ton of annual steel slab production at real capacity
+            factor ($/metric ton).
     """
 
     natural_gas_prices: dict[str, float]
     excess_oxygen: float = 395
     lime_unitcost: float = 122.1
-    lime_transport_cost: float = 0.0  # USD/tonne lime
+    lime_transport_cost: float = 0.0  # USD/metric ton lime
     carbon_unitcost: float = 236.97
-    carbon_transport_cost: float = 0.0  # USD/tonne carbon
+    carbon_transport_cost: float = 0.0  # USD/metric ton carbon
     electricity_cost: float = 48.92
     iron_ore_pellet_unitcost: float = 207.35
-    iron_ore_pellet_transport_cost: float = 0.0  # USD/tonne iron
+    iron_ore_pellet_transport_cost: float = 0.0  # USD/metric ton iron
     oxygen_market_price: float = 0.03
     raw_water_unitcost: float = 0.59289
     iron_ore_consumption: float = 1.62927
@@ -100,11 +100,11 @@ class SteelCostModelConfig:
             Indicates whether oxygen and heat integration is used, affecting preheating
             CapEx, cooling CapEx, and oxygen sales. Default is True.
         co2_fuel_emissions (float):
-            CO2 emissions from fuel per metric tonne of steel production.
+            CO2 emissions from fuel per metric ton of steel production.
         co2_carbon_emissions (float):
-            CO2 emissions from carbon per metric tonne of steel production.
+            CO2 emissions from carbon per metric ton of steel production.
         surface_water_discharge (float):
-            Surface water discharge per metric tonne of steel production.
+            Surface water discharge per metric ton of steel production.
     """
 
     operational_year: int
@@ -217,7 +217,7 @@ class SteelCapacityModelConfig:
         hydrogen_amount_kgpy Optional (float): The amount of hydrogen available in kilograms
             per year to make steel.
         desired_steel_mtpy Optional (float): The amount of desired steel production in
-            metric tonnes per year.
+            metric tons per year.
         input_capacity_factor_estimate (float): The estimated steel plant capacity factor.
         feedstocks (Feedstocks): An instance of the `Feedstocks` class detailing the
             costs and consumption rates of resources used in production.
@@ -245,8 +245,8 @@ class SteelCapacityModelOutputs:
 
     Attributes:
         steel_plant_size_mtpy (float): If amount of hydrogen in kilograms per year is input,
-            the size of the steel plant in metric tonnes per year is output.
-        hydrogen_amount_kgpy (float): If amount of steel production in metric tonnes per year is
+            the size of the steel plant in metric tons per year is output.
+        hydrogen_amount_kgpy (float): If amount of steel production in metric tons per year is
             input, the amount of necessary hydrogen feedstock in kilograms per year is output.
     """
 
@@ -611,7 +611,7 @@ def run_steel_finance_model(
         SteelFinanceModelOutputs:
             Object containing detailed financial analysis results, including solution
             metrics, summary values, price breakdown, and steel price breakdown per
-            tonne. This output is instrumental in assessing the financial performance
+            metric ton. This output is instrumental in assessing the financial performance
             and breakeven price for the steel production facility.
     """
 
@@ -632,7 +632,7 @@ def run_steel_finance_model(
         "commodity",
         {
             "name": "Steel",
-            "unit": "metric tonnes",
+            "unit": "metric tons",
             "initial price": 1000,
             "escalation": config.gen_inflation,
         },
@@ -771,63 +771,63 @@ def run_steel_finance_model(
     pf.add_feedstock(
         name="Maintenance Materials",
         usage=1.0,
-        unit="Units per metric tonne of steel",
+        unit="Units per metric ton of steel",
         cost=feedstocks.maintenance_materials_unitcost,
         escalation=config.gen_inflation,
     )
     pf.add_feedstock(
         name="Raw Water Withdrawal",
         usage=feedstocks.raw_water_consumption,
-        unit="metric tonnes of water per metric tonne of steel",
+        unit="metric tons of water per metric ton of steel",
         cost=feedstocks.raw_water_unitcost,
         escalation=config.gen_inflation,
     )
     pf.add_feedstock(
         name="Lime",
         usage=feedstocks.lime_consumption,
-        unit="metric tonnes of lime per metric tonne of steel",
+        unit="metric tons of lime per metric ton of steel",
         cost=(feedstocks.lime_unitcost + feedstocks.lime_transport_cost),
         escalation=config.gen_inflation,
     )
     pf.add_feedstock(
         name="Carbon",
         usage=feedstocks.carbon_consumption,
-        unit="metric tonnes of carbon per metric tonne of steel",
+        unit="metric tons of carbon per metric ton of steel",
         cost=(feedstocks.carbon_unitcost + feedstocks.carbon_transport_cost),
         escalation=config.gen_inflation,
     )
     pf.add_feedstock(
         name="Iron Ore",
         usage=feedstocks.iron_ore_consumption,
-        unit="metric tonnes of iron ore per metric tonne of steel",
+        unit="metric tons of iron ore per metric ton of steel",
         cost=(feedstocks.iron_ore_pellet_unitcost + feedstocks.iron_ore_pellet_transport_cost),
         escalation=config.gen_inflation,
     )
     pf.add_feedstock(
         name="Hydrogen",
         usage=feedstocks.hydrogen_consumption,
-        unit="metric tonnes of hydrogen per metric tonne of steel",
+        unit="metric tons of hydrogen per metric ton of steel",
         cost=config.lcoh * 1000,
         escalation=config.gen_inflation,
     )
     pf.add_feedstock(
         name="Natural Gas",
         usage=feedstocks.natural_gas_consumption,
-        unit="GJ-LHV per metric tonne of steel",
+        unit="GJ-LHV per metric ton of steel",
         cost=feedstocks.natural_gas_prices,
         escalation=config.gen_inflation,
     )
     pf.add_feedstock(
         name="Electricity",
         usage=feedstocks.electricity_consumption,
-        unit="MWh per metric tonne of steel",
+        unit="MWh per metric ton of steel",
         cost=config.grid_prices,
         escalation=config.gen_inflation,
     )
     pf.add_feedstock(
         name="Slag Disposal",
         usage=feedstocks.slag_production,
-        unit="metric tonnes of slag per metric tonne of steel",
+        unit="metric tons of slag per metric ton of steel",
         cost=feedstocks.slag_disposal_unitcost,
         escalation=config.gen_inflation,
     )
@@ -835,7 +835,7 @@ def run_steel_finance_model(
     pf.add_coproduct(
         name="Oxygen sales",
         usage=feedstocks.excess_oxygen,
-        unit="kg O2 per metric tonne of steel",
+        unit="kg O2 per metric ton of steel",
         cost=feedstocks.oxygen_market_price,
         escalation=config.gen_inflation,
     )

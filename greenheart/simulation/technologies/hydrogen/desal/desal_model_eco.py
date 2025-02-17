@@ -11,7 +11,7 @@ Args:
     - input and output values from RO_desal() below
     - others may be added as needed
 Returns (can be from separate functions and/or methods as it makes sense):
-    - mass (float): approximate mass of the desalination system (kg or tonnes)
+    - mass (float): approximate mass of the desalination system (kg or metric tons)
     - footprint (float): approximate area required for the desalination system (m^2)
 """
 

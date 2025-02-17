@@ -679,12 +679,12 @@ def h2_main():
                     )
                     # print(electrolyzer_cost)
                     # print(
-                    #     "Levelized Cost of Steel ($/tonne): {}".format(
+                    #     "Levelized Cost of Steel ($/metric ton): {}".format(
                     #         Green_steel_results["Levelized Cost of Steel"][0]
                     #     )
                     # )
                     # print(
-                    #     "NPV of Entire Green Steel Factory (MUSD/tonne): {}".format(
+                    #     "NPV of Entire Green Steel Factory (MUSD/metric ton): {}".format(
                     #         Green_steel_results["Net Present Value"][0]
                     #     )
                     # )
@@ -700,7 +700,7 @@ def h2_main():
                     #     )
                     # )
                     # print(
-                    #     "Steel Produced per year in Tonnes per year: {}".format(
+                    #     "Steel Produced per year in metric tons per year: {}".format(
                     #         Green_steel_results["Yearly Steel Production"][0]
                     #     )
                     # )
@@ -709,7 +709,7 @@ def h2_main():
                     #         Green_steel_results["Levelized Cost of Oxygen"][0]
                     #     )
                     # )
-                    # print("Emissions in tonnes CO2: {}".format(Green_steel_results["Emissions"][0]))  # noqa: E501
+                    # print("Emissions in metric tons CO2: {}".format(Green_steel_results["Emissions"][0]))  # noqa: E501
 
                     # print(Green_steel_results)
                     file_name = (

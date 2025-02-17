@@ -78,8 +78,8 @@ class CompressedGasFunction:
         return a * x**b
 
     def calculate_max_storage_capacity(self, Wind_avai, H2_flow, Release_efficiency):
-        # reference flow rate of steel plants in tonne/day, in case in the future it is not
-        # 200 tonne/day
+        # reference flow rate of steel plants in metric ton/day, in case in the future it is not
+        # 200 metric ton/day
         H2_flow_ref = 200
 
         capacity_max = (
@@ -115,7 +115,7 @@ class CompressedGasFunction:
         Wind_avai is only used for calculating the theoretical maximum storage capacity prior to
         curve fitting
 
-        H2_flow is (I think) the rate the H2 is being removed from the tank in Tonne/day
+        H2_flow is (I think) the rate the H2 is being removed from the tank in metric ton/day
 
         cdratio is the charge/discharge ratio (1 means charge rate equals the discharge rate, 2
         means charge is 2x the discharge rate)
@@ -769,7 +769,7 @@ class CompressedGasFunction:
             color="r",
             label="Calc",
         )
-        ax[1, 1].set_xlabel("Capacity (Tonnes H2)")
+        ax[1, 1].set_xlabel("Capacity (metric tons H2)")
         ax[1, 1].set_ylabel("Energy Use (GWh)")
 
         equation_energy = (
@@ -785,7 +785,7 @@ class CompressedGasFunction:
 
         ################ Wrap Up ######################
 
-        ax[1, 0].set_xlabel("Capacity (Tonnes H2)")
+        ax[1, 0].set_xlabel("Capacity (metric tons H2)")
 
         plt.tight_layout()
         plt.show()

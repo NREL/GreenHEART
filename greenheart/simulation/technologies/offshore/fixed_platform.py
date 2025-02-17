@@ -22,7 +22,7 @@ Sources:
 Args:
     - tech_required_area: (float): area needed for combination of all tech (m^2), not including
       buffer or working space
-    - tech_combined_mass: (float): mass of all tech being placed on the platform (kg or tonnes)year
+    - tech_combined_mass: (float): mass of all tech being placed on the platform (kg or metric tons)
 
     - depth: (float): bathometry at the platform location (m)
     - distance: (float): distance ships must travel from port to site location (km)
@@ -43,7 +43,7 @@ Returns:
 """
 Notes:
     - Thank you Jake Nunemaker's oswh2 repository!!!
-    - pile_cost=0 $US/tonne for monopile construction. Not a bug, this # is
+    - pile_cost=0 $US/metric ton for monopile construction. Not a bug, this # is
       consistent with the rest of ORBIT [1].
 """
 
@@ -234,12 +234,12 @@ def calc_substructure_mass_and_cost(
     """
     calc_substructure_mass_and_cost returns the total mass including substructure, topside and
     equipment.  Also returns the cost of the substructure and topside
-    Inputs: mass            | Mass of equipment on platform (tonnes)
+    Inputs: mass            | Mass of equipment on platform (metric tons)
             area            | Area needed for equipment (meter^2) (not necessary)
             depth           | Ocean depth at platform location (meters) (not necessary)
-            fab_cost_rate   | Cost rate to fabricate topside (USD/tonne)
+            fab_cost_rate   | Cost rate to fabricate topside (USD/metric ton)
             design_cost     | Design cost to design structural components (USD) from ORBIT
-            sub_cost_rate   | Steel cost rate (USD/tonne) from ORBIT"""
+            sub_cost_rate   | Steel cost rate (USD/metric ton) from ORBIT"""
     """
     Platform is substructure and topside combined
     All functions are based off NREL's ORBIT [1] (oss_design.py)
