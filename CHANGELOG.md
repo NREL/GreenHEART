@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Allow users to save the GreenHEARTOutput class as a yaml file and read that yaml to an instance of the output class
+- Include new plotting capabilities: (1) hydrogen storage, production, and dispatch; (2) electricity and hydrogen dispatch
 
 ## v0.1.4 [4 February 2025]
 
