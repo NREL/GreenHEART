@@ -4,8 +4,6 @@ This directory provides example Jupyter notebooks demonstrating how to use the G
 
 The first three notebooks focus on the GreenHEART simulation interface, which supports single analysis cases as well as optimization for levelized cost of product. The final example, `04-PEM_electrolyzer.ipynb`, illustrates how to use GreenHEART's PEM electrolyzer model.
 
-> **Note**: The `reference_plants` directory, containing reference designs for green hydrogen, ammonia, and steel plants across the U.S., will be removed in future releases. Reference plant data is now hosted at [NREL/ReferenceHybridSystemDesigns](https://github.com/NREL/ReferenceHybridSystemDesigns).
-
 ## Structure
 
 - **01-green-hydrogen.ipynb**: Demonstrates a workflow for green hydrogen production using renewable energy and electrolysis.
