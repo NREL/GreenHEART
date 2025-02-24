@@ -15,6 +15,10 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 import matplotlib.pyplot as plt
 from attrs import field, define, fields
+
+
+pd.options.mode.chained_assignment = None  # default='warn'
+
 from ProFAST import ProFAST
 from hopp.utilities import load_yaml
 from hopp.simulation import HoppInterface
@@ -24,6 +28,15 @@ import greenheart.tools.eco.hopp_mgmt as he_hopp
 import greenheart.tools.eco.utilities as he_util
 import greenheart.tools.eco.electrolysis as he_elec
 import greenheart.tools.eco.hydrogen_mgmt as he_h2
+import greenheart.tools.profast_reverse_tools as rev_pf_tools
+import greenheart.tools.greenheart_sim_file_utils as gh_fio
+from greenheart.tools.eco.utilities import calculate_lca
+from greenheart.simulation.technologies.iron.iron import (
+    IronCostModelOutputs,
+    IronFinanceModelOutputs,
+    IronPerformanceModelOutputs,
+    run_iron_full_model,
+)
 from greenheart.simulation.technologies.steel.steel import (
     SteelCostModelOutputs,
     SteelFinanceModelOutputs,
@@ -35,6 +48,9 @@ from greenheart.simulation.technologies.ammonia.ammonia import (
     AmmoniaFinanceModelOutputs,
     AmmoniaCapacityModelOutputs,
     run_ammonia_full_model,
+)
+from greenheart.simulation.technologies.iron.Martin_Transport.iron_transport import (
+    calc_iron_ship_cost,
 )
 
 
@@ -116,6 +132,10 @@ class GreenHeartSimulationConfig:
         plant_design_scenario (int): plant design scenario
         output_level (int): output level
         grid_connection (Optional[bool]): flag for grid connection
+        run_full_simulation (bool): flag for whether to run any of GreenHEART besides the
+                                iron model or just load pickles of everything else
+        run_full_simulation_fn (Optional[str]): filename for where to save the above pickles
+        iron_out_fn (Optional[str]): filename for where to save final results
     """
 
     filename_hopp_config: str
@@ -139,6 +159,17 @@ class GreenHeartSimulationConfig:
     plant_design_scenario: int = field(default=1)
     output_level: int = field(default=8)
     grid_connection: bool | None = field(default=None)
+    run_full_simulation: bool = field(default=True)
+    save_physics_results: bool = field(default=False)
+    run_full_simulation_fn: str | None = field(default=None)
+    iron_out_fn: str | None = field(default=None)
+    iron_modular: bool = field(default=False)
+    user_lcoh: float | None = field(default=None)
+    user_lcoe: float | None = field(default=None)
+    user_annual_wind_kwh_prod: float | dict | None = field(default=None)
+    user_annual_pv_kwh_prod: float | dict | None = field(default=None)
+    user_life_annual_h2_kwh: float | dict | None = field(default=None)
+    user_life_annual_h2_prod: float | dict | None = field(default=None)
     save_greenheart_output: bool | None = field(default=False)
 
     # these are set in the __attrs_post_init__ method
@@ -243,6 +274,9 @@ class GreenHeartSimulationOutput:
         steel_capacity (Optional[SteelCapacityModelOutputs]): steel capacity information
         steel_costs (Optional[SteelCostModelOutputs]): steel cost information
         steel_finance (Optional[SteelFinanceModelOutputs]): steel financial information
+        steel_capacity (Optional[SteelCapacityModelOutputs]): steel capacity information
+        steel_costs (Optional[SteelCostModelOutputs]): steel cost information
+        steel_finance (Optional[SteelFinanceModelOutputs]): steel financial information
         ammonia_capacity (Optional[AmmoniaCapacityModelOutputs]): ammonia capacity information
         ammonia_costs (Optional[AmmoniaCostModelOutputs]): ammonia cost information
         ammonia_finance (Optional[AmmoniaFinanceModelOutputs]): ammonia finance information
@@ -281,6 +315,10 @@ class GreenHeartSimulationOutput:
     steel_capacity: SteelCapacityModelOutputs | None = field(default=None)
     steel_costs: SteelCostModelOutputs | None = field(default=None)
     steel_finance: SteelFinanceModelOutputs | None = field(default=None)
+
+    iron_performance: IronPerformanceModelOutputs | None = field(default=None)
+    iron_costs: IronCostModelOutputs | None = field(default=None)
+    iron_finance: IronFinanceModelOutputs | None = field(default=None)
 
     ammonia_capacity: AmmoniaCapacityModelOutputs | None = field(default=None)
     ammonia_costs: AmmoniaCostModelOutputs | None = field(default=None)
@@ -327,7 +365,7 @@ class GreenHeartSimulationOutput:
         `.yaml` file. The result is missing the following: `greenheart_config`, `hopp_interface`,
         `profast_lcoe`, `profast_lcoh`, `profast_lcoh_grid_only`, and `hopp_results`. Note that
         data types will not exactly match the instance of GreenHeartSimulationOutput that was
-        saved due to equired data type conversions for yaml output and easy loading.
+        saved due to required data type conversions for yaml output and easy loading.
 
         Args:
             filename (str): Path to the file where an instance of GreenHeartSimulationOutput
@@ -377,17 +415,18 @@ def setup_greenheart_simulation(config: GreenHeartSimulationConfig):
                 f"'num_turbines' in the orbit_config was"
                 f" {config.orbit_config['plant']['num_turbines']}, but 'num_turbines' in"
                 f"hopp_config was"
-                f" {config.hopp_config['technologies']['wind']['num_turbines']}. The 'num_turbines'"
-                " value in the orbit_config is being overwritten with the value from the"
-                " hopp_config"
+                f" {config.hopp_config['technologies']['wind']['num_turbines']}. The "
+                "'num_turbines' value in the orbit_config is being overwritten with the value"
+                " from the hopp_config"
             )
+
             warnings.warn(msg, UserWarning)
 
         if config.orbit_config["site"]["depth"] != config.greenheart_config["site"]["depth"]:
             config.orbit_config["site"].update({"depth": config.greenheart_config["site"]["depth"]})
             msg = (
-                f"site depth in the orbit_config was {config.orbit_config['site']['depth']}, but"
-                f" site depth in"
+                f"site depth in the orbit_config was {config.orbit_config['site']['depth']}, "
+                f"but site depth in"
                 f" greenheart_config was {config.greenheart_config['site']['depth']}. The site"
                 " depth value in the orbit_config is being overwritten with the value from"
                 " the greenheart_config."
@@ -410,8 +449,8 @@ def setup_greenheart_simulation(config: GreenHeartSimulationConfig):
                 f" {config.orbit_config['plant']['turbine_spacing']}, but 'turbine_spacing' in"
                 f" greenheart_config was"
                 f" {config.greenheart_config['site']['wind_layout']['turbine_spacing']}. The"
-                " 'turbine_spacing' value in the orbit_config is being overwritten with the value"
-                " from the greenheart_config"
+                " 'turbine_spacing' value in the orbit_config is being overwritten with the "
+                "value from the greenheart_config"
             )
             warnings.warn(msg, UserWarning)
 
@@ -427,8 +466,8 @@ def setup_greenheart_simulation(config: GreenHeartSimulationConfig):
                 f" {config.orbit_config['plant']['row_spacing']}, but 'row_spacing' in"
                 f" greenheart_config was"
                 f" {config.greenheart_config['site']['wind_layout']['row_spacing']}. The"
-                " 'row_spacing' value in the orbit_config is being overwritten with the value from"
-                " the greenheart_config"
+                " 'row_spacing' value in the orbit_config is being overwritten with the value "
+                "from the greenheart_config"
             )
             warnings.warn(msg, UserWarning)
 
@@ -471,9 +510,9 @@ def setup_greenheart_simulation(config: GreenHeartSimulationConfig):
                 wind_om_per_kw = config.hopp_config["config"]["cost_info"]["wind_om_per_kw"]
                 msg = (
                     f"'om_capacity[{i}]' in the wind 'fin_model' was {om_fixed_wind_fin_model},"
-                    f" but 'wind_om_per_kw' in 'cost_info' was {wind_om_per_kw}. The 'om_capacity'"
-                    " value in the wind 'fin_model' is being overwritten with the value from the"
-                    " 'cost_info'"
+                    f" but 'wind_om_per_kw' in 'cost_info' was {wind_om_per_kw}. The "
+                    "'om_capacity' value in the wind 'fin_model' is being overwritten with the "
+                    "value from the 'cost_info'"
                 )
                 warnings.warn(msg, UserWarning)
         if ("wind_om_per_mwh" in config.hopp_config["config"]["cost_info"]) and (
@@ -526,10 +565,10 @@ def setup_greenheart_simulation(config: GreenHeartSimulationConfig):
                 ]["om_capacity"][i]
                 pv_om_per_kw = config.hopp_config["config"]["cost_info"]["pv_om_per_kw"]
                 msg = (
-                    f"'om_capacity[{i}]' in the pv 'fin_model' was {om_fixed_pv_fin_model}, but"
-                    f" 'pv_om_per_kw' in 'cost_info' was {pv_om_per_kw}. The 'om_capacity' value"
-                    " in the pv 'fin_model' is being overwritten with the value from the"
-                    " 'cost_info'"
+                    f"'om_capacity[{i}]' in the pv 'fin_model' was {om_fixed_pv_fin_model}, "
+                    f"but 'pv_om_per_kw' in 'cost_info' was {pv_om_per_kw}. The 'om_capacity'"
+                    " value in the pv 'fin_model' is being overwritten with the value from"
+                    " the 'cost_info'"
                 )
                 warnings.warn(msg, UserWarning)
         if ("pv_om_per_mwh" in config.hopp_config["config"]["cost_info"]) and (
@@ -555,8 +594,9 @@ def setup_greenheart_simulation(config: GreenHeartSimulationConfig):
             pv_om_per_mwh = config.hopp_config["config"]["cost_info"]["pv_om_per_mwh"]
             msg = (
                 f"'om_production' in the pv 'fin_model' was {om_pv_variable_cost}, but"
-                f" 'pv_om_per_mwh' in 'cost_info' was {pv_om_per_mwh}. The 'om_production' value"
-                " in the pv 'fin_model' is being overwritten with the value from the 'cost_info'"
+                f" 'pv_om_per_mwh' in 'cost_info' was {pv_om_per_mwh}. The 'om_production'"
+                " value in the pv 'fin_model' is being overwritten with the value from the"
+                "'cost_info'"
             )
             warnings.warn(msg, UserWarning)
 
@@ -613,8 +653,8 @@ def setup_greenheart_simulation(config: GreenHeartSimulationConfig):
             msg = (
                 f"'om_production' in the battery 'fin_model' was {om_batt_variable_cost}, but"
                 f" 'battery_om_per_mwh' in 'cost_info' was {battery_om_per_mwh}. The"
-                " 'om_production' value in the battery 'fin_model' is being overwritten with the"
-                " value from the 'cost_info'",
+                " 'om_production' value in the battery 'fin_model' is being overwritten with "
+                "the value from the 'cost_info'",
             )
             warnings.warn(msg, UserWarning)
 
@@ -631,21 +671,53 @@ def setup_greenheart_simulation(config: GreenHeartSimulationConfig):
         save_plots=config.save_plots,
     )
 
+    if config.save_physics_results:
+        gh_fio.save_physics_results_greenheart_setup(config, wind_cost_results)
+
     return config, hi, wind_cost_results
 
 
-def run_simulation(config: GreenHeartSimulationConfig):
-    config, hi, wind_cost_results = setup_greenheart_simulation(config=config)
+def setup_greenheart_simulation_for_iron(config: GreenHeartSimulationConfig):
+    # Only do the full setup (other than initialization) if running all of GreenHEART
+    # If only running iron model, just load after initializing
+    # Preserve iron from new instance of config
+    if config.iron_modular:
+        iron_ore_config = copy.deepcopy(config.greenheart_config["iron_ore"])
+        # iron_pre_config = copy.deepcopy(config.greenheart_config['iron_pre'])
+        iron_win_config = copy.deepcopy(config.greenheart_config["iron_win"])
+        iron_post_config = copy.deepcopy(config.greenheart_config["iron_post"])
+    else:
+        iron_config = copy.deepcopy(config.greenheart_config["iron"])
 
+    # Identify the site resource
+    config, wind_cost_results = gh_fio.load_physics_greenheart_setup(config)
+
+    # Flip run_full_simulation back to False (was True when saved)
+    config.run_full_simulation = False
+    if config.iron_modular:
+        config.greenheart_config["iron_ore"] = iron_ore_config
+        # config.greenheart_config['iron_pre'] = iron_pre_config
+        config.greenheart_config["iron_win"] = iron_win_config
+        config.greenheart_config["iron_post"] = iron_post_config
+    else:
+        config.greenheart_config["iron"] = iron_config
+
+    # HOPP Interface is expected as an output, but not needed
+    hi = None
+
+    return config, hi, wind_cost_results
+
+
+def run_physics(config: GreenHeartSimulationConfig, hi, wind_cost_results):
     # run HOPP model
-    # hopp_results = he_hopp.run_hopp(
-    #     hopp_site, hopp_technologies, hopp_scenario, hopp_h2_args, verbose=verbose
-    # )
     hopp_results = he_hopp.run_hopp(
         hi,
         project_lifetime=config.greenheart_config["project_parameters"]["project_lifetime"],
         verbose=config.verbose,
     )
+
+    hopp_results["annual_energies"]["wind"]  # annual energy from wind (kWh)
+    hopp_results["annual_energies"]["pv"]  # annual energy from solar (kWh)
 
     if config.design_scenario["wind_location"] == "onshore":
         wind_config = he_fin.WindCostConfig(
@@ -795,7 +867,8 @@ def run_simulation(config: GreenHeartSimulationConfig):
         total_accessory_power_renewable_kw = np.zeros(len(electrolyzer_energy_consumption_bop_kw))
         total_accessory_power_renewable_kw += electrolyzer_energy_consumption_bop_kw
         total_accessory_power_grid_kw = np.zeros(len(electrolyzer_energy_consumption_bop_kw))
-        # if transport is not HVDC and h2 storage is on shore, then power the storage from the grid
+        # if transport is not HVDC and h2 storage is on shore, then power the storage from
+        # the grid
         if (design_scenario["transportation"] == "pipeline") and (
             design_scenario["h2_storage_location"] == "onshore"
         ):
@@ -806,8 +879,8 @@ def run_simulation(config: GreenHeartSimulationConfig):
                 desal_power_kw + h2_transport_compressor_power_kw + h2_storage_power_kw
             )
 
-        # subtract peripheral power from supply to get what is left for electrolyzer and also get
-        # grid power
+        ### subtract peripheral power from supply to get what is left for electrolyzer and
+        # also get grid power
         remaining_power_profile = np.zeros_like(
             hopp_results["combined_hybrid_power_production_hopp"]
         )
@@ -923,7 +996,7 @@ def run_simulation(config: GreenHeartSimulationConfig):
             electrolyzer_bop_kw,
         )
 
-    ############# solving for energy needed for non-electrolyzer components ########################
+    ############# solving for energy needed for non-electrolyzer components ##################
     # this approach either exactly over over-estimates the energy needed for non-electrolyzer
     # components
     solver_results = simple_solver(0)
@@ -934,8 +1007,8 @@ def run_simulation(config: GreenHeartSimulationConfig):
     # residual = energy_residual_function(solver_result)
     # print("\nresidual: ", residual)
 
-    # this approach exactly sizes the energy needed for the non-electrolyzer components (according
-    # to the current models anyway)
+    # this approach exactly sizes the energy needed for the non-electrolyzer components
+    # (according to the current models anyway)
     # solver_result = optimize.brentq(energy_residual_function, -10, 20000, rtol=1E-5)
     # OptimizeResult = optimize.root(energy_residual_function, 11E3, tol=1)
     # solver_result = OptimizeResult.x
@@ -943,7 +1016,7 @@ def run_simulation(config: GreenHeartSimulationConfig):
     # solver_result = solver_results[0]
     # print(solver_result)
 
-    ##################################################################################################################
+    ##########################################################################################
 
     # get results for final design
     (
@@ -975,13 +1048,13 @@ def run_simulation(config: GreenHeartSimulationConfig):
     )
 
     ################# OSW intermediate calculations" aka final financial calculations
-    # does LCOE even make sense if we are only selling the H2? I think in this case LCOE should not
-    # be used, rather LCOH should be used. Or, we could use LCOE based on the electricity actually
-    # used for h2. I think LCOE is just being used to estimate the cost of the electricity used,
-    # but in this case we should just use the cost of the electricity generating plant since we are
-    # not selling to the grid. We could build in a grid connection later such that we use LCOE for
-    # any purchased electricity and sell any excess electricity after H2 production. Actually, I
-    # think this is what OSW is doing for LCOH
+    # does LCOE even make sense if we are only selling the H2? I think in this case LCOE
+    # should not be used, rather LCOH should be used. Or, we could use LCOE based on the
+    # electricity actually used for h2. I think LCOE is just being used to estimate the cost
+    # of the electricity used, but in this case we should just use the cost of the electricity
+    # generating plant since we are not selling to the grid. We could build in a grid
+    # connection later such that we use LCOE for any purchased electricity and sell any excess
+    # electricity after H2 production. Actually, I think this is what OSW is doing for LCOH
 
     # TODO double check full-system CAPEX
     capex, capex_breakdown = he_fin.run_capex(
@@ -1024,58 +1097,203 @@ def run_simulation(config: GreenHeartSimulationConfig):
             / (hopp_results["hybrid_plant"].system_capacity_kw.hybrid * 365 * 24),
         )
 
+    return (
+        hopp_results,
+        wind_cost_results,
+        electrolyzer_physics_results,
+        electrolyzer_cost_results,
+        desal_results,
+        h2_pipe_array_results,
+        h2_transport_compressor,
+        h2_transport_compressor_results,
+        h2_transport_pipe_results,
+        pipe_storage,
+        h2_storage_results,
+        total_accessory_power_renewable_kw,
+        total_accessory_power_grid_kw,
+        remaining_power_profile,
+        capex,
+        capex_breakdown,
+        opex_annual,
+        opex_breakdown_annual,
+        platform_results,
+        solver_results,
+    )
+
+
+def run_financials(
+    config,
+    hopp_results,
+    wind_cost_results,
+    electrolyzer_physics_results,
+    capex_breakdown,
+    opex_breakdown_annual,
+    total_accessory_power_renewable_kw,
+    total_accessory_power_grid_kw,
+    wind_annual_energy_kwh,
+    solar_pv_annual_energy_kwh,
+):
+    lcoe, pf_lcoe = he_fin.run_profast_lcoe(
+        config.greenheart_config,
+        wind_cost_results,
+        capex_breakdown,
+        opex_breakdown_annual,
+        hopp_results,
+        config.incentive_option,
+        config.design_scenario,
+        verbose=config.verbose,
+        show_plots=config.show_plots,
+        save_plots=config.save_plots,
+        output_dir=config.output_dir,
+    )
+    lcoh_grid_only, pf_grid_only = he_fin.run_profast_grid_only(
+        config.greenheart_config,
+        wind_cost_results,
+        electrolyzer_physics_results,
+        capex_breakdown,
+        opex_breakdown_annual,
+        hopp_results,
+        config.design_scenario,
+        total_accessory_power_renewable_kw,
+        total_accessory_power_grid_kw,
+        verbose=config.verbose,
+        show_plots=config.show_plots,
+        save_plots=config.save_plots,
+        output_dir=config.output_dir,
+    )
+    lcoh, pf_lcoh = he_fin.run_profast_full_plant_model(
+        config.greenheart_config,
+        wind_cost_results,
+        electrolyzer_physics_results,
+        capex_breakdown,
+        opex_breakdown_annual,
+        hopp_results,
+        config.incentive_option,
+        config.design_scenario,
+        total_accessory_power_renewable_kw,
+        total_accessory_power_grid_kw,
+        verbose=config.verbose,
+        show_plots=config.show_plots,
+        save_plots=config.save_plots,
+        output_dir=config.output_dir,
+    )
+
+    # save lcoh, lcoe and electrolyzer physics results
+    if config.save_physics_results:
+        gh_fio.save_physics_results_greenheart_simulation(
+            config,
+            lcoh,
+            lcoe,
+            electrolyzer_physics_results,
+            wind_annual_energy_kwh,
+            solar_pv_annual_energy_kwh,
+            0,
+        )
+    hydrogen_amount_kgpy = electrolyzer_physics_results["H2_Results"][
+        "Life: Annual H2 production [kg/year]"
+    ]
+
+    hydrogen_annual_energy_kwh = electrolyzer_physics_results["power_to_electrolyzer_kw"]
+
+    return (
+        lcoe,
+        pf_lcoe,
+        lcoh,
+        pf_lcoh,
+        lcoh_grid_only,
+        pf_grid_only,
+        hydrogen_annual_energy_kwh,
+        hydrogen_amount_kgpy,
+    )
+
+
+def run_simulation(config: GreenHeartSimulationConfig):
+    if config.user_lcoe is not None and config.user_lcoh is not None:
+        lcoe = float(config.user_lcoe)
+        lcoh = float(config.user_lcoh)
+        wind_annual_energy_kwh = float(config.user_annual_wind_kwh_prod)
+        solar_pv_annual_energy_kwh = float(config.user_annual_pv_kwh_prod)
+        hydrogen_annual_energy_kwh = float(config.user_life_annual_h2_kwh)
+        hydrogen_amount_kgpy = float(config.user_life_annual_h2_prod)
+        config.run_full_simulation = False
+    else:
+        if config.run_full_simulation:
+            config, hi, wind_cost_results = setup_greenheart_simulation(config=config)
+        else:
+            setup_greenheart_simulation_for_iron(config=config)
+
+    # Only run the "pre-iron" steps if needed
+    # Otherwise, load their outputs from pickles
+    if config.run_full_simulation:
+        physics_results = run_physics(config, hi, wind_cost_results)
+
+        (
+            hopp_results,
+            wind_cost_results,
+            electrolyzer_physics_results,
+            electrolyzer_cost_results,
+            desal_results,
+            h2_pipe_array_results,
+            h2_transport_compressor,
+            h2_transport_compressor_results,
+            h2_transport_pipe_results,
+            pipe_storage,
+            h2_storage_results,
+            total_accessory_power_renewable_kw,
+            total_accessory_power_grid_kw,
+            remaining_power_profile,
+            capex,
+            capex_breakdown,
+            opex_annual,
+            opex_breakdown_annual,
+            platform_results,
+            solver_results,
+        ) = physics_results
+
     steel_finance = None
+    iron_finance = None
     ammonia_finance = None
 
     if config.use_profast:
-        lcoe, pf_lcoe = he_fin.run_profast_lcoe(
-            config.greenheart_config,
-            wind_cost_results,
-            capex_breakdown,
-            opex_breakdown_annual,
-            hopp_results,
-            config.incentive_option,
-            config.design_scenario,
-            verbose=config.verbose,
-            show_plots=config.show_plots,
-            save_plots=config.save_plots,
-            output_dir=config.output_dir,
-        )
-        lcoh_grid_only, pf_grid_only = he_fin.run_profast_grid_only(
-            config.greenheart_config,
-            wind_cost_results,
-            electrolyzer_physics_results,
-            capex_breakdown,
-            opex_breakdown_annual,
-            hopp_results,
-            config.design_scenario,
-            total_accessory_power_renewable_kw,
-            total_accessory_power_grid_kw,
-            verbose=config.verbose,
-            show_plots=config.show_plots,
-            save_plots=config.save_plots,
-            output_dir=config.output_dir,
-        )
-        lcoh, pf_lcoh = he_fin.run_profast_full_plant_model(
-            config.greenheart_config,
-            wind_cost_results,
-            electrolyzer_physics_results,
-            capex_breakdown,
-            opex_breakdown_annual,
-            hopp_results,
-            config.incentive_option,
-            config.design_scenario,
-            total_accessory_power_renewable_kw,
-            total_accessory_power_grid_kw,
-            verbose=config.verbose,
-            show_plots=config.show_plots,
-            save_plots=config.save_plots,
-            output_dir=config.output_dir,
-        )
+        if config.run_full_simulation:
+            (
+                lcoe,
+                pf_lcoe,
+                lcoh,
+                pf_lcoh,
+                lcoh_grid_only,
+                pf_grid_only,
+                hydrogen_annual_energy_kwh,
+                hydrogen_amount_kgpy,
+            ) = run_financials(
+                config,
+                hopp_results,
+                wind_cost_results,
+                electrolyzer_physics_results,
+                capex_breakdown,
+                opex_breakdown_annual,
+                total_accessory_power_renewable_kw,
+                total_accessory_power_grid_kw,
+                wind_annual_energy_kwh,
+                solar_pv_annual_energy_kwh,
+            )
+        else:
+            if config.user_lcoe is None and config.user_lcoh is None:
+                # load lcoh, lcoe and electrolyzer physics results from previous run
+                (
+                    lcoh,
+                    lcoe,
+                    electrolyzer_physics_results,
+                    wind_annual_energy_kwh,
+                    solar_pv_annual_energy_kwh,
+                ) = gh_fio.load_physics_greenheart_simulation(config)
+                hydrogen_amount_kgpy = electrolyzer_physics_results["H2_Results"][
+                    "Life: Annual H2 production [kg/year]"
+                ]
 
-        hydrogen_amount_kgpy = electrolyzer_physics_results["H2_Results"][
-            "Life: Annual H2 production [kg/year]"
-        ]
+                hydrogen_annual_energy_kwh = electrolyzer_physics_results[
+                    "power_to_electrolyzer_kw"
+                ]
 
         if "steel" in config.greenheart_config:
             steel_config = copy.deepcopy(config.greenheart_config)
@@ -1103,8 +1321,122 @@ def run_simulation(config: GreenHeartSimulationConfig):
                 design_scenario_id=config.design_scenario["id"],
             )
 
+        if any(
+            i in config.greenheart_config
+            for i in ["iron", "iron_pre", "iron_pre", "iron_win", "iron_post"]
+        ):
+            config.greenheart_config["iron_out_fn"] = config.iron_out_fn
+            iron_config = copy.deepcopy(config.greenheart_config)
+            cap_denom = iron_config["iron_win"]["performance"]["capacity_denominator"]
+            # Check that steel is not being specified as capacity denominator
+            # without a suitable configuration (e.g. EAF)
+            if cap_denom == "steel":
+                raise NotImplementedError("Haven't set up to calculate per unit steel yet")
+                # if "eaf" not in iron_config["iron_post"]["product selection"]:
+                #     msg = (
+                #         "Steel was chosen for capacity denominator, but"
+                #         " the iron model is not set up produce steel!"
+                #         " (try adding an EAF to the iron_post module)"
+                #     )
+                #     raise ValueError(msg)
+            if config.verbose:
+                print("Running iron\n")
+
+            if not config.iron_modular:
+                # use lcoh from the electrolyzer model if it is not already in the config
+                if "lcoh" not in iron_config["iron"]["finances"]:
+                    iron_config["iron"]["finances"]["lcoh"] = lcoh
+
+                # use lcoh from the electrolyzer model if it is not already in the config
+                if "lcoh" not in iron_config["iron"]["costs"]:
+                    iron_config["iron"]["costs"]["lcoh"] = lcoh
+
+                # use the hydrogen amount from the electrolyzer physics model if it is not
+                # already in the config
+                if "hydrogen_amount_kgpy" not in iron_config["iron"]["performance"]:
+                    iron_config["iron"]["performance"]["hydrogen_amount_kgpy"] = (
+                        hydrogen_amount_kgpy
+                    )
+
+                iron_performance, iron_costs, iron_finance = run_iron_full_model(iron_config)
+
+            else:
+                # This is not the most graceful way to do this... but it avoids copied imports
+                # and copying iron.py
+                iron_ore_config = copy.deepcopy(iron_config)
+                copy.deepcopy(iron_config)
+                iron_win_config = copy.deepcopy(iron_config)
+                iron_post_config = copy.deepcopy(iron_config)
+                iron_ore_config["iron"] = iron_config["iron_ore"]
+                # iron_pre_config["iron"] = iron_config["iron_pre"]
+                iron_win_config["iron"] = iron_config["iron_win"]
+                iron_post_config["iron"] = iron_config["iron_post"]
+                for sub_iron_config in [
+                    iron_ore_config,
+                    iron_win_config,
+                    iron_post_config,
+                ]:  # ,iron_post_config]: # iron_pre_config, iron_post_config
+                    sub_iron_config["iron"]["performance"]["hydrogen_amount_kgpy"] = (
+                        hydrogen_amount_kgpy
+                    )
+                    sub_iron_config["iron"]["costs"]["lcoe"] = lcoe
+                    sub_iron_config["iron"]["finances"]["lcoe"] = lcoe
+                    sub_iron_config["iron"]["costs"]["lcoh"] = lcoh
+                    sub_iron_config["iron"]["finances"]["lcoh"] = lcoh
+
+                # TODO: find a way of looping the above and below
+                iron_ore_performance, iron_ore_costs, iron_ore_finance = run_iron_full_model(
+                    iron_ore_config
+                )
+
+                # TODO: save all the individual module outputs, using a loop
+                # Identify the site
+
+                gh_fio.save_iron_ore_results(
+                    config, iron_ore_config, iron_ore_performance, iron_ore_costs, iron_ore_finance
+                )
+
+                # iron_pre_performance, iron_pre_costs, iron_pre_finance = \
+                #     run_iron_full_model(iron_pre_config)
+
+                iron_transport_cost_tonne, ore_profit_pct = calc_iron_ship_cost(iron_win_config)
+
+                ### DRI ----------------------------------------------------------------------------
+                iron_win_config["iron"]["finances"]["ore_profit_pct"] = ore_profit_pct
+                iron_win_config["iron"]["costs"]["iron_transport_tonne"] = iron_transport_cost_tonne
+                iron_win_config["iron"]["costs"]["lco_iron_ore_tonne"] = iron_ore_finance.sol["lco"]
+                iron_win_performance, iron_win_costs, iron_win_finance = run_iron_full_model(
+                    iron_win_config
+                )
+
+                ### EAF ----------------------------------------------------------------------------
+                if iron_config["iron_post"]["product_selection"] == "none":
+                    iron_performance = iron_win_performance
+                    iron_costs = iron_win_costs
+                    iron_finance = iron_win_finance
+
+                else:
+                    pf_config = rev_pf_tools.make_pf_config_from_profast(
+                        iron_win_finance.pf
+                    )  # dictionary of profast objects
+                    pf_dict = rev_pf_tools.convert_pf_res_to_pf_config(
+                        copy.deepcopy(pf_config)
+                    )  # profast dictionary of values
+                    iron_post_config["iron"]["finances"]["pf"] = pf_dict
+                    iron_post_config["iron"]["costs"]["lco_iron_ore_tonne"] = iron_ore_finance.sol[
+                        "lco"
+                    ]
+                    iron_post_config["iron"]["performance"]["capacity_denominator"] = cap_denom
+                    iron_post_performance, iron_post_costs, iron_post_finance = run_iron_full_model(
+                        iron_post_config
+                    )
+
+                    iron_performance = iron_post_performance
+                    iron_costs = iron_post_costs
+                    iron_finance = iron_post_finance
+
         else:
-            steel_finance = {}
+            iron_finance = {}
 
         if "ammonia" in config.greenheart_config:
             ammonia_config = copy.deepcopy(config.greenheart_config)
@@ -1129,6 +1461,8 @@ def run_simulation(config: GreenHeartSimulationConfig):
 
         else:
             ammonia_finance = {}
+
+    gh_fio.save_iron_results(config, iron_performance, iron_costs, iron_finance)
 
     ################# end OSW intermediate calculations
     if config.post_processing:
@@ -1161,6 +1495,21 @@ def run_simulation(config: GreenHeartSimulationConfig):
             output_dir=config.output_dir,
         )  # , lcoe, lcoh, lcoh_with_grid, lcoh_grid_only)
 
+    if iron_config["lca_config"]["run_lca"]:
+        lca_df = calculate_lca(
+            wind_annual_energy_kwh,
+            solar_pv_annual_energy_kwh,
+            0,
+            hydrogen_amount_kgpy,
+            hydrogen_annual_energy_kwh,
+            config.hopp_config,
+            config.greenheart_config,
+            0,
+            0,
+            plant_design_scenario_number=9,
+            incentive_option_number=1,
+        )
+
     # return
     if config.output_level == 0:
         return 0
@@ -1192,8 +1541,28 @@ def run_simulation(config: GreenHeartSimulationConfig):
         return lcoe, lcoh, lcoh_grid_only, hopp_results["hopp_interface"]
     elif config.output_level == 6:
         return hopp_results, electrolyzer_physics_results, remaining_power_profile
+
     elif config.output_level == 7:
-        return lcoe, lcoh, steel_finance, ammonia_finance
+        if any(
+            i in config.greenheart_config
+            for i in ["iron", "iron_pre", "iron_pre", "iron_win", "iron_post"]
+        ):
+            if "ng" in iron_config["iron_win"]["product_selection"]:
+                LCA_label = "NG DRI Total Lifetime Average GHG Emissions (kg-CO2e/MT steel)"
+            elif "h2" in iron_config["iron_win"]["product_selection"]:
+                LCA_label = (
+                    "H2 DRI Electrolysis Total Lifetime Average GHG Emissions (kg-CO2e/MT steel)"
+                )
+            if iron_config["lca_config"]["run_lca"]:
+                gh_fio.save_iron_results(
+                    config, iron_performance, iron_costs, iron_finance, lca_df[LCA_label].values[0]
+                )
+                ammonia_finance = lca_df[LCA_label].values[
+                    0
+                ]  # repurposing ammonia finance to hold CI
+            return lcoe, lcoh, iron_finance, ammonia_finance
+        else:
+            return lcoe, lcoh, steel_finance, ammonia_finance
     elif config.output_level == 8:
         output = GreenHeartSimulationOutput(
             config,
@@ -1238,6 +1607,8 @@ def run_simulation(config: GreenHeartSimulationConfig):
             ),
             platform_results=platform_results,
         )
+    elif config.output_level == 9:
+        return [lcoe, lcoh, iron_finance, iron_post_finance]
 
         if config.save_greenheart_output:
             output.save_to_file(Path(config.output_dir).resolve() / "data/greenheart_output.yaml")

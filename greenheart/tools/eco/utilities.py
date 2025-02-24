@@ -17,6 +17,8 @@ from hopp.tools.dispatch import plot_tools
 from hopp.simulation.technologies.resource.greet_data import GREETData
 from hopp.simulation.technologies.resource.cambium_data import CambiumData
 
+from greenheart.tools.data_loading_utils import load_dill_pickle
+
 from .finance import adjust_orbit_costs
 
 
@@ -1427,8 +1429,11 @@ def save_energy_flows(
 
 
 def calculate_lca(
-    hopp_results,
-    electrolyzer_physics_results,
+    wind_annual_energy_kwh,
+    solar_pv_annual_energy_kwh,
+    energy_shortfall_hopp,
+    h2_annual_prod_kg,
+    energy_to_electrolyzer_kwh,
     hopp_config,
     greenheart_config,
     total_accessory_power_renewable_kw,
@@ -1463,6 +1468,10 @@ def calculate_lca(
         lca_df (pandas.DataFrame): Pandas DataFrame containing average emissions intensities over
             lifetime of plant and other relevant data
     """
+    # TODO:
+    # confirm site lat/long is proper for where electricity use will be
+    # (set from iron_pre or iron_win?)
+    # add coke_supply_EI to HOPP greet_data.py parsing (GREET1 > EF > BG6:16)
 
     # Load relevant config and results data from HOPP and GreenHEART:
     site_latitude = hopp_config["site"]["data"]["lat"]
@@ -1476,12 +1485,7 @@ def calculate_lca(
     tax_incentive_option = greenheart_config["policy_parameters"][
         f"option{incentive_option_number}"
     ]  # tax incentive option number
-    wind_annual_energy_kwh = hopp_results["annual_energies"][
-        "wind"
-    ]  # annual energy from wind (kWh)
-    solar_pv_annual_energy_kwh = hopp_results["annual_energies"][
-        "pv"
-    ]  # annual energy from solar (kWh)
+
     # battery_annual_energy_kwh = hopp_results["annual_energies"][
     #     "battery"
     # ]  # annual energy from battery (kWh)
@@ -1538,18 +1542,13 @@ def calculate_lca(
     )
 
     # Calculate average annual and lifetime h2 production
-    h2_annual_prod_kg = np.array(
-        electrolyzer_physics_results["H2_Results"]["Life: Annual H2 production [kg/year]"]
-    )  # Lifetime Average Annual H2 production accounting for electrolyzer degradation (kg H2/year)
     h2_lifetime_prod_kg = (
         h2_annual_prod_kg * project_lifetime
     )  # Lifetime H2 production accounting for electrolyzer degradation (kg H2)
 
     # Calculate energy to electrolyzer and peripherals when hybrid-grid case
     if grid_case == "hybrid-grid":
-        energy_shortfall_hopp = hopp_results[
-            "energy_shortfall_hopp"
-        ]  # Total electricity to electrolyzer and peripherals from grid power (kWh)
+        # Total electricity to electrolyzer and peripherals from grid power (kWh)
         energy_shortfall_hopp.shape = (
             project_lifetime,
             8760,
@@ -1561,14 +1560,11 @@ def calculate_lca(
 
     # Calculate energy to electrolyzer and peripherals when grid-only case
     if grid_case == "grid-only":
-        energy_to_electrolyzer = electrolyzer_physics_results[
-            "power_to_electrolyzer_kw"
-        ]  # Total electricity to electrolyzer from grid power (kWh
         energy_to_peripherals = (
             total_accessory_power_renewable_kw + total_accessory_power_grid_kw
         )  # Total electricity to peripherals from grid power (kWh)
         annual_energy_to_electrolysis_from_grid = (
-            energy_to_electrolyzer + energy_to_peripherals
+            energy_to_electrolyzer_kwh + energy_to_peripherals
         )  # Average Annual electricity to electrolyzer and peripherals from grid power
         # shape = (8760,)
 
@@ -1602,6 +1598,8 @@ def calculate_lca(
         "steel_smr_ccs",
         "steel_atr",
         "steel_atr_ccs",
+        "ng_dri",
+        "h2_dri_electrolysis",
     ]
 
     scopes = ["Scope3", "Scope2", "Scope1", "Total"]
@@ -1853,6 +1851,112 @@ def calculate_lca(
     ]  # Lime consumption for DRI-EAF Steel production
     # (metric ton lime/metric ton steel production)
 
+    ## Load in Iron model outputs
+    # Read iron_performance.performances_df from pkl
+    iron_performance_fn = "{}/iron_performance/{:.3f}_{:.3f}_{:d}.pkl".format(
+        greenheart_config["iron_out_fn"],
+        site_latitude,
+        site_longitude,
+        hopp_config["site"]["data"]["year"],
+    )
+    iron_performance = load_dill_pickle(iron_performance_fn)
+    iron_performance = iron_performance.performances_df
+    if greenheart_config["iron_win"]["product_selection"] == "h2_dri":
+        # Note to Dakota from Jonathan - the denominator has been corrected,
+        # we're now getting performance per unit pig iron, not per unit steel
+        # Leave this code in though, I want to be able to build an option to
+        # calculate per unit steel instead of per unit iron
+        h2_dri_steel_prod = iron_performance.loc[
+            iron_performance["Name"] == "Steel Production", "Model"
+        ].item()
+        # metric tonnes steel per year
+        h2_dri_pigiron_prod = iron_performance.loc[
+            iron_performance["Name"] == "Pig Iron Production", "Model"
+        ].item()
+        # metric tonnes pig iron per year
+        capacity_denominator = greenheart_config["iron_win"]["performance"]["capacity_denominator"]
+        if capacity_denominator == "iron":
+            steel_to_pigiron_ratio = 1
+        elif capacity_denominator == "steel":
+            steel_to_pigiron_ratio = h2_dri_steel_prod / h2_dri_pigiron_prod
+        # conversion from MT steel to MT pig iron in denominator of units
+        h2_dri_iron_ore_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Iron Ore", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # metric tonnes ore / pellet consumed per metric tonne pig iron produced
+        h2_dri_H2_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Hydrogen", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # metric tonne H2 consumed per metric tonne pig iron produced
+        h2_dri_NG_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Natural Gas", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # GJ-LHV NG consumed per metric tonne pig iron produced
+        h2_dri_electricity_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Electricity", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # MWh electricity consumed per metric tonne pig iron produced
+        h2_dri_H2O_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Raw Water Withdrawal", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # metric tonne H2O consume per metric tonne pig iron produced
+
+        ng_dri_steel_prod = np.nan
+        ng_dri_pigiron_prod = np.nan
+        ng_dri_iron_ore_consume = np.nan
+        ng_dri_NG_consume = np.nan
+        ng_dri_electricity_consume = np.nan
+        ng_dri_H2O_consume = np.nan
+
+    elif greenheart_config["iron_win"]["product_selection"] == "ng_dri":
+        h2_dri_steel_prod = np.nan
+        h2_dri_pigiron_prod = np.nan
+        h2_dri_iron_ore_consume = np.nan
+        h2_dri_H2_consume = np.nan
+        h2_dri_NG_consume = np.nan
+        h2_dri_electricity_consume = np.nan
+        h2_dri_H2O_consume = np.nan
+
+        ng_dri_steel_prod = iron_performance.loc[
+            iron_performance["Name"] == "Steel Production", "Model"
+        ].item()
+        # metric tonnes steel per year
+        ng_dri_pigiron_prod = iron_performance.loc[
+            iron_performance["Name"] == "Pig Iron Production", "Model"
+        ].item()
+        # metric tonnes pig iron per year
+        capacity_denominator = greenheart_config["iron_win"]["performance"]["capacity_denominator"]
+        if capacity_denominator == "iron":
+            steel_to_pigiron_ratio = 1
+        elif capacity_denominator == "steel":
+            steel_to_pigiron_ratio = ng_dri_steel_prod / ng_dri_pigiron_prod
+        # conversion from MT steel to MT pig iron in denominator of units
+        ng_dri_iron_ore_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Iron Ore", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # metric tonnes ore / pellet consumed per metric tonne pig iron produced
+        ng_dri_NG_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Natural Gas", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # GJ-LHV NG consumed per metric tonne pig iron produced
+        ng_dri_electricity_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Electricity", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # MWh electricity consumed per metric tonne pig iron produced
+        ng_dri_H2O_consume = (
+            iron_performance.loc[iron_performance["Name"] == "Raw Water Withdrawal", "Model"].item()
+            * steel_to_pigiron_ratio
+        )
+        # metric tonne H2O consumed per metric tonne pig iron produced
+
     ## Cambium
     # Define cambium_year
     # NOTE: at time of dev hopp logic for LCOH = atb_year + 2yr + install_period(3yrs) = 5 years
@@ -2081,6 +2185,55 @@ def calculate_lca(
                 + EI_values["steel_electrolysis_Scope3_EI"]
             )
 
+            # Calculate H2 DRI emissions via hybrid grid electrolysis
+            # (kg CO2e/metric tonne pig iron)
+            EI_values["h2_dri_electrolysis_Scope3_EI"] = (
+                (h2_dri_H2_consume * MT_to_kg * EI_values["electrolysis_Total_EI"])
+                + (h2_dri_iron_ore_consume * iron_ore_mining_EI_per_MT_ore)
+                + (h2_dri_iron_ore_consume * iron_ore_pelletizing_EI_per_MT_ore)
+                + (h2_dri_NG_consume * NG_supply_EI)
+                + (h2_dri_H2O_consume * (H2O_supply_EI / gal_H2O_to_MT))
+                + (
+                    h2_dri_electricity_consume
+                    * cambium_data_df["LRMER CO2 equiv. precombustion (kg-CO2e/MWh)"].mean()
+                )
+                + (h2_dri_electricity_consume * MWh_to_kWh * grid_capex_EI)
+            )
+            EI_values["h2_dri_electrolysis_Scope2_EI"] = (
+                h2_dri_electricity_consume
+                * cambium_data_df["LRMER CO2 equiv. combustion (kg-CO2e/MWh)"].mean()
+            )
+            EI_values["h2_dri_electrolysis_Scope1_EI"] = h2_dri_NG_consume * NG_combust_EI
+            EI_values["h2_dri_electrolysis_Total_EI"] = (
+                EI_values["h2_dri_electrolysis_Scope1_EI"]
+                + EI_values["h2_dri_electrolysis_Scope2_EI"]
+                + EI_values["h2_dri_electrolysis_Scope3_EI"]
+            )
+
+            # Calculate Natural Gas (NG) DRI emissions
+            # (kg CO2e/metric tonne pig iron)
+            EI_values["ng_dri_Scope3_EI"] = (
+                (ng_dri_iron_ore_consume * iron_ore_mining_EI_per_MT_ore)
+                + (ng_dri_iron_ore_consume * iron_ore_pelletizing_EI_per_MT_ore)
+                + (ng_dri_NG_consume * NG_supply_EI)
+                + (ng_dri_H2O_consume * (H2O_supply_EI / gal_H2O_to_MT))
+                + (
+                    ng_dri_electricity_consume
+                    * cambium_data_df["LRMER CO2 equiv. precombustion (kg-CO2e/MWh)"].mean()
+                )
+                + (ng_dri_electricity_consume * MWh_to_kWh * grid_capex_EI)
+            )
+            EI_values["ng_dri_Scope2_EI"] = (
+                ng_dri_electricity_consume
+                * cambium_data_df["LRMER CO2 equiv. combustion (kg-CO2e/MWh)"].mean()
+            )
+            EI_values["ng_dri_Scope1_EI"] = ng_dri_NG_consume * NG_combust_EI
+            EI_values["ng_dri_Total_EI"] = (
+                EI_values["ng_dri_Scope1_EI"]
+                + EI_values["ng_dri_Scope2_EI"]
+                + EI_values["ng_dri_Scope3_EI"]
+            )
+
         if "grid-only" in grid_case:
             ## H2 production via electrolysis
             # Calculate grid-connected electrolysis emissions (kg CO2e/kg H2)
@@ -2153,6 +2306,31 @@ def calculate_lca(
                 EI_values["steel_electrolysis_Scope1_EI"]
                 + EI_values["steel_electrolysis_Scope2_EI"]
                 + EI_values["steel_electrolysis_Scope3_EI"]
+            )
+
+            # Calculate H2 DRI emissions via hybrid grid electrolysis
+            # (kg CO2e/metric tonne pig iron)
+            EI_values["h2_dri_electrolysis_Scope3_EI"] = (
+                (h2_dri_H2_consume * MT_to_kg * EI_values["electrolysis_Total_EI"])
+                + (h2_dri_iron_ore_consume * iron_ore_mining_EI_per_MT_ore)
+                + (h2_dri_iron_ore_consume * iron_ore_pelletizing_EI_per_MT_ore)
+                + (h2_dri_NG_consume * NG_supply_EI)
+                + (h2_dri_H2O_consume * (H2O_supply_EI / gal_H2O_to_MT))
+                + (
+                    h2_dri_electricity_consume
+                    * cambium_data_df["LRMER CO2 equiv. precombustion (kg-CO2e/MWh)"].mean()
+                )
+                + (h2_dri_electricity_consume * MWh_to_kWh * grid_capex_EI)
+            )
+            EI_values["h2_dri_electrolysis_Scope2_EI"] = (
+                h2_dri_electricity_consume
+                * cambium_data_df["LRMER CO2 equiv. combustion (kg-CO2e/MWh)"].mean()
+            )
+            EI_values["h2_dri_electrolysis_Scope1_EI"] = h2_dri_NG_consume * NG_combust_EI
+            EI_values["h2_dri_electrolysis_Total_EI"] = (
+                EI_values["h2_dri_electrolysis_Scope1_EI"]
+                + EI_values["h2_dri_electrolysis_Scope2_EI"]
+                + EI_values["h2_dri_electrolysis_Scope3_EI"]
             )
 
             ## H2 production via SMR
@@ -2442,6 +2620,29 @@ def calculate_lca(
                 + EI_values["steel_atr_ccs_Scope3_EI"]
             )
 
+            # Calculate Natural Gas (NG) DRI emissions (kg CO2e/metric tonne pig iron)
+            EI_values["ng_dri_Scope3_EI"] = (
+                (ng_dri_iron_ore_consume * iron_ore_mining_EI_per_MT_ore)
+                + (ng_dri_iron_ore_consume * iron_ore_pelletizing_EI_per_MT_ore)
+                + (ng_dri_NG_consume * NG_supply_EI)
+                + (ng_dri_H2O_consume * (H2O_supply_EI / gal_H2O_to_MT))
+                + (
+                    ng_dri_electricity_consume
+                    * cambium_data_df["LRMER CO2 equiv. precombustion (kg-CO2e/MWh)"].mean()
+                )
+                + (ng_dri_electricity_consume * MWh_to_kWh * grid_capex_EI)
+            )
+            EI_values["ng_dri_Scope2_EI"] = (
+                ng_dri_electricity_consume
+                * cambium_data_df["LRMER CO2 equiv. combustion (kg-CO2e/MWh)"].mean()
+            )
+            EI_values["ng_dri_Scope1_EI"] = ng_dri_NG_consume * NG_combust_EI
+            EI_values["ng_dri_Total_EI"] = (
+                EI_values["ng_dri_Scope1_EI"]
+                + EI_values["ng_dri_Scope2_EI"]
+                + EI_values["ng_dri_Scope3_EI"]
+            )
+
         if "off-grid" in grid_case:
             ## H2 production via electrolysis
             # Calculate renewable only electrolysis emissions (kg CO2e/kg H2)
@@ -2512,6 +2713,53 @@ def calculate_lca(
                 EI_values["steel_electrolysis_Scope1_EI"]
                 + EI_values["steel_electrolysis_Scope2_EI"]
                 + EI_values["steel_electrolysis_Scope3_EI"]
+            )
+
+            # Calculate H2 DRI emissions via off grid electrolysis (kg CO2e/metric tonne pig iron)
+            EI_values["h2_dri_electrolysis_Scope3_EI"] = (
+                (h2_dri_H2_consume * MT_to_kg * EI_values["electrolysis_Total_EI"])
+                + (h2_dri_iron_ore_consume * iron_ore_mining_EI_per_MT_ore)
+                + (h2_dri_iron_ore_consume * iron_ore_pelletizing_EI_per_MT_ore)
+                + (h2_dri_NG_consume * NG_supply_EI)
+                + (h2_dri_H2O_consume * (H2O_supply_EI / gal_H2O_to_MT))
+                + (
+                    h2_dri_electricity_consume
+                    * cambium_data_df["LRMER CO2 equiv. precombustion (kg-CO2e/MWh)"].mean()
+                )
+                + (h2_dri_electricity_consume * MWh_to_kWh * grid_capex_EI)
+            )
+            EI_values["h2_dri_electrolysis_Scope2_EI"] = (
+                h2_dri_electricity_consume
+                * cambium_data_df["LRMER CO2 equiv. combustion (kg-CO2e/MWh)"].mean()
+            )
+            EI_values["h2_dri_electrolysis_Scope1_EI"] = h2_dri_NG_consume * NG_combust_EI
+            EI_values["h2_dri_electrolysis_Total_EI"] = (
+                EI_values["h2_dri_electrolysis_Scope1_EI"]
+                + EI_values["h2_dri_electrolysis_Scope2_EI"]
+                + EI_values["h2_dri_electrolysis_Scope3_EI"]
+            )
+
+            # Calculate Natural Gas (NG) DRI emissions (kg CO2e/metric tonne pig iron)
+            EI_values["ng_dri_Scope3_EI"] = (
+                (ng_dri_iron_ore_consume * iron_ore_mining_EI_per_MT_ore)
+                + (ng_dri_iron_ore_consume * iron_ore_pelletizing_EI_per_MT_ore)
+                + (ng_dri_NG_consume * NG_supply_EI)
+                + (ng_dri_H2O_consume * (H2O_supply_EI / gal_H2O_to_MT))
+                + (
+                    ng_dri_electricity_consume
+                    * cambium_data_df["LRMER CO2 equiv. precombustion (kg-CO2e/MWh)"].mean()
+                )
+                + (ng_dri_electricity_consume * MWh_to_kWh * grid_capex_EI)
+            )
+            EI_values["ng_dri_Scope2_EI"] = (
+                ng_dri_electricity_consume
+                * cambium_data_df["LRMER CO2 equiv. combustion (kg-CO2e/MWh)"].mean()
+            )
+            EI_values["ng_dri_Scope1_EI"] = ng_dri_NG_consume * NG_combust_EI
+            EI_values["ng_dri_Total_EI"] = (
+                EI_values["ng_dri_Scope1_EI"]
+                + EI_values["ng_dri_Scope2_EI"]
+                + EI_values["ng_dri_Scope3_EI"]
             )
 
         # Append emission intensity values for each year to lists in the ts_EI_data dictionary
@@ -2608,6 +2856,22 @@ def calculate_lca(
         ],
         "Steel Electrolysis Total Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
             sum(np.asarray(ts_EI_data_interpolated["steel_electrolysis_Total_EI"]))
+            / project_lifetime
+        ],
+        "H2 DRI Electrolysis Scope 3 Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
+            sum(np.asarray(ts_EI_data_interpolated["h2_dri_electrolysis_Scope3_EI"]))
+            / project_lifetime
+        ],
+        "H2 DRI Electrolysis Scope 2 Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
+            sum(np.asarray(ts_EI_data_interpolated["h2_dri_electrolysis_Scope2_EI"]))
+            / project_lifetime
+        ],
+        "H2 DRI Electrolysis Scope 1 Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
+            sum(np.asarray(ts_EI_data_interpolated["h2_dri_electrolysis_Scope1_EI"]))
+            / project_lifetime
+        ],
+        "H2 DRI Electrolysis Total Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
+            sum(np.asarray(ts_EI_data_interpolated["h2_dri_electrolysis_Total_EI"]))
             / project_lifetime
         ],
         "SMR Scope 3 Lifetime Average GHG Emissions (kg-CO2e/kg-H2)": [
@@ -2753,6 +3017,18 @@ def calculate_lca(
         ],
         "Steel ATR with CCS Total Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
             sum(np.asarray(ts_EI_data_interpolated["steel_atr_ccs_Total_EI"])) / project_lifetime
+        ],
+        "NG DRI Scope 3 Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
+            sum(np.asarray(ts_EI_data_interpolated["ng_dri_Scope3_EI"])) / project_lifetime
+        ],
+        "NG DRI Scope 2 Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
+            sum(np.asarray(ts_EI_data_interpolated["ng_dri_Scope2_EI"])) / project_lifetime
+        ],
+        "NG DRI Scope 1 Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
+            sum(np.asarray(ts_EI_data_interpolated["ng_dri_Scope1_EI"])) / project_lifetime
+        ],
+        "NG DRI Total Lifetime Average GHG Emissions (kg-CO2e/MT steel)": [
+            sum(np.asarray(ts_EI_data_interpolated["ng_dri_Total_EI"])) / project_lifetime
         ],
         "Site Latitude": [site_latitude],
         "Site Longitude": [site_longitude],

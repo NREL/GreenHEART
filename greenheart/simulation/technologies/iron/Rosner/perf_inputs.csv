@@ -1,0 +1,145 @@
+Product,Name,Type,Unit,Model
+h2_dri_eaf,Steel Production,capacity,mtpy,1189678
+h2_dri_eaf,Pig Iron Production,capacity,mtpy,1418094.867
+h2_dri_eaf,Capacity Factor,capacity,%,100
+h2_dri_eaf,Iron Ore,feed,mt ore / mt steel,1.62927
+h2_dri_eaf,Reformer Catalyst,feed,m3 catalyst/mt steel,0
+h2_dri_eaf,Hydrogen,feed,mt H2 / mt steel,0.06596
+h2_dri_eaf,Natural Gas,feed,GJ-LHV NG / mt steel,0.71657
+h2_dri_eaf,Electricity,feed,MWh / mt steel,0.5502
+h2_dri_eaf,Carbon (Coke),feed,mt C / mt steel,0.0538
+h2_dri_eaf,Lime,feed,mt lime / mt steel,0.01812
+h2_dri_eaf,Raw Water Withdrawal,feed,mt H2O / mt steel,0.80367
+h2_dri_eaf,Carbon Dioxide (Methane as Fuel),emission,mt CO2 / mt steel,0.03929
+h2_dri_eaf,Carbon Dioxide (Carbon),emission,mt CO2 / mt steel,0.17466
+h2_dri_eaf,Slag,emission,mt slag / mt steel,0.17433
+h2_dri_eaf,Surface Water Discharge,emission,mt H2O discharged/mt H2O withdrawn,0.42113
+h2_dri_eaf,Steelmaking efficiency,efficiency,%,60.07
+h2_dri_eaf,Reformer Furnace & Stack Air Blower,feed,kW / mtpy steel,0
+h2_dri_eaf,Process Gas recycle,feed,kW / mtpy steel,0
+h2_dri_eaf,DRI Scrubber Electricity,feed,kW / mtpy steel,0.000122575
+h2_dri_eaf,Cooling Tower & Water Circulation Electricity,feed,kW / mtpy steel,0.000760857
+h2_dri_eaf,Oxygen Supply Electricity,feed,kW / mtpy steel,0.010389687
+h2_dri_eaf,Electric Arc Furnace Electricity,feed,kW / mtpy steel,0.041202278
+h2_dri_eaf,Ladle Refining Electricity,feed,kW / mtpy steel,0.003218638
+h2_dri_eaf,Miscellaneous Balance of Plant Electricity,feed,kW / mtpy steel,0.007113805
+h2_dri,Steel Production,capacity,mtpy,1189678
+h2_dri,Pig Iron Production,capacity,mtpy,1418094.867
+h2_dri,Capacity Factor,capacity,%,100
+h2_dri,Iron Ore,feed,mt ore / mt steel,1.62927
+h2_dri,Reformer Catalyst,feed,m3 catalyst/mt steel,0
+h2_dri,Hydrogen,feed,mt H2 / mt steel,0.06596
+h2_dri,Natural Gas,feed,GJ-LHV NG / mt steel,0.622287755
+h2_dri,Electricity,feed,MWh / mt steel,0.117029561
+h2_dri,Carbon (Coke),feed,mt C / mt steel,0
+h2_dri,Lime,feed,mt lime / mt steel,0
+h2_dri,Raw Water Withdrawal,feed,mt H2O / mt steel,0.642938077
+h2_dri,Carbon Dioxide (Methane as Fuel),emission,mt CO2 / mt steel,0.029631801
+h2_dri,Carbon Dioxide (Carbon),emission,mt CO2 / mt steel,0.377646164
+h2_dri,Slag,emission,mt slag / mt steel,0
+h2_dri,Surface Water Discharge,emission,mt H2O discharged/mt H2O withdrawn,0.270760315
+h2_dri,Steelmaking efficiency,efficiency,%,87.988
+h2_dri,Reformer Furnace & Stack Air Blower,feed,kW / mtpy steel,0
+h2_dri,Process Gas recycle,feed,kW / mtpy steel,0
+h2_dri,DRI Scrubber Electricity,feed,kW / mtpy steel,0.000122575
+h2_dri,Cooling Tower & Water Circulation Electricity,feed,kW / mtpy steel,0.000608686
+h2_dri,Oxygen Supply Electricity,feed,kW / mtpy steel,0.005507939
+h2_dri,Electric Arc Furnace Electricity,feed,kW / mtpy steel,0.000006534
+h2_dri,Ladle Refining Electricity,feed,kW / mtpy steel,0
+h2_dri,Miscellaneous Balance of Plant Electricity,feed,kW / mtpy steel,0.007113805
+h2_eaf,Steel Production,capacity,mtpy,1189678
+h2_eaf,Pig Iron Production,capacity,mtpy,1418094.867
+h2_eaf,Capacity Factor,capacity,%,100
+h2_eaf,Iron Ore,feed,mt ore / mt steel,0
+h2_eaf,Reformer Catalyst,feed,m3 catalyst/mt steel,0
+h2_eaf,Hydrogen,feed,mt H2 / mt steel,0
+h2_eaf,Natural Gas,feed,GJ-LHV NG / mt steel,0.094282245
+h2_eaf,Electricity,feed,MWh / mt steel,0.433170439
+h2_eaf,Carbon (Coke),feed,mt C / mt steel,0.0538
+h2_eaf,Lime,feed,mt lime / mt steel,0.01812
+h2_eaf,Raw Water Withdrawal,feed,mt H2O / mt steel,0.160731923
+h2_eaf,Carbon Dioxide (Methane as Fuel),emission,mt CO2 / mt steel,0.009658199
+h2_eaf,Carbon Dioxide (Carbon),emission,mt CO2 / mt steel,0
+h2_eaf,Slag,emission,mt slag / mt steel,0.17433
+h2_eaf,Surface Water Discharge,emission,mt H2O discharged/mt H2O withdrawn,0.150369685
+h2_eaf,Steelmaking efficiency,efficiency,%,60.07
+h2_eaf,Reformer Furnace & Stack Air Blower,feed,kW / mtpy steel,0
+h2_eaf,Process Gas recycle,feed,kW / mtpy steel,0
+h2_eaf,DRI Scrubber Electricity,feed,kW / mtpy steel,0
+h2_eaf,Cooling Tower & Water Circulation Electricity,feed,kW / mtpy steel,0.000152171
+h2_eaf,Oxygen Supply Electricity,feed,kW / mtpy steel,0.004881748
+h2_eaf,Electric Arc Furnace Electricity,feed,kW / mtpy steel,0.041195744
+h2_eaf,Ladle Refining Electricity,feed,kW / mtpy steel,0.003218638
+h2_eaf,Miscellaneous Balance of Plant Electricity,feed,kW / mtpy steel,0
+ng_dri_eaf,Steel Production,capacity,mtpy,1189772
+ng_dri_eaf,Pig Iron Production,capacity,mtpy,1418206.915
+ng_dri_eaf,Capacity Factor,capacity,%,100
+ng_dri_eaf,Iron Ore,feed,mt ore / mt steel,1.629206363
+ng_dri_eaf,Reformer Catalyst,feed,m3 catalyst/mt steel,0.000003493
+ng_dri_eaf,Hydrogen,feed,mt H2 / mt steel,0
+ng_dri_eaf,Natural Gas,feed,GJ-LHV NG / mt steel,10.41822203
+ng_dri_eaf,Electricity,feed,MWh / mt steel,0.583453494
+ng_dri_eaf,Carbon (Coke),feed,mt C / mt steel,0.047169223
+ng_dri_eaf,Lime,feed,mt lime / mt steel,0.018120393
+ng_dri_eaf,Raw Water Withdrawal,feed,mt H2O / mt steel,1.158363659
+ng_dri_eaf,Carbon Dioxide (Methane as Fuel),emission,mt CO2 / mt steel,0
+ng_dri_eaf,Carbon Dioxide (Carbon),emission,mt CO2 / mt steel,0.721051998
+ng_dri_eaf,Slag,emission,mt slag / mt steel,0.174325548
+ng_dri_eaf,Surface Water Discharge,emission,mt H2O discharged/mt H2O withdrawn,0.326557377
+ng_dri_eaf,Steelmaking efficiency,efficiency,%,52.854
+ng_dri_eaf,Reformer Furnace & Stack Air Blower,feed,kW / mtpy steel,0.004095664
+ng_dri_eaf,Process Gas recycle,feed,kW / mtpy steel,0.00451324
+ng_dri_eaf,DRI Scrubber Electricity,feed,kW / mtpy steel,0.00011255
+ng_dri_eaf,Cooling Tower & Water Circulation Electricity,feed,kW / mtpy steel,0.000717118
+ng_dri_eaf,Oxygen Supply Electricity,feed,kW / mtpy steel,0.004981703
+ng_dri_eaf,Electric Arc Furnace Electricity,feed,kW / mtpy steel,0.040593161
+ng_dri_eaf,Ladle Refining Electricity,feed,kW / mtpy steel,0.003143966
+ng_dri_eaf,Miscellaneous Balance of Plant Electricity,feed,kW / mtpy steel,0.006901666
+ng_dri,Steel Production,capacity,mtpy,1189772
+ng_dri,Pig Iron Production,capacity,mtpy,1418206.915
+ng_dri,Capacity Factor,capacity,%,100
+ng_dri,Iron Ore,feed,mt ore / mt steel,1.629206363
+ng_dri,Reformer Catalyst,feed,m3 catalyst/mt steel,0.000003493
+ng_dri,Hydrogen,feed,mt H2 / mt steel,0
+ng_dri,Natural Gas,feed,GJ-LHV NG / mt steel,8.270148697
+ng_dri,Electricity,feed,MWh / mt steel,0.16645596
+ng_dri,Carbon (Coke),feed,mt C / mt steel,0
+ng_dri,Lime,feed,mt lime / mt steel,0
+ng_dri,Raw Water Withdrawal,feed,mt H2O / mt steel,0.905191697
+ng_dri,Carbon Dioxide (Methane as Fuel),emission,mt CO2 / mt steel,0
+ng_dri,Carbon Dioxide (Carbon),emission,mt CO2 / mt steel,0.721051998
+ng_dri,Slag,emission,mt slag / mt steel,0
+ng_dri,Surface Water Discharge,emission,mt H2O discharged/mt H2O withdrawn,0.281912658
+ng_dri,Steelmaking efficiency,efficiency,%,52.853
+ng_dri,Reformer Furnace & Stack Air Blower,feed,kW / mtpy steel,0.004095663
+ng_dri,Process Gas recycle,feed,kW / mtpy steel,0.00451324
+ng_dri,DRI Scrubber Electricity,feed,kW / mtpy steel,0.00011255
+ng_dri,Cooling Tower & Water Circulation Electricity,feed,kW / mtpy steel,0.000573694
+ng_dri,Oxygen Supply Electricity,feed,kW / mtpy steel,0.002805009
+ng_dri,Electric Arc Furnace Electricity,feed,kW / mtpy steel,0
+ng_dri,Ladle Refining Electricity,feed,kW / mtpy steel,0
+ng_dri,Miscellaneous Balance of Plant Electricity,feed,kW / mtpy steel,0.006901666
+ng_eaf,Steel Production,capacity,mtpy,1189772
+ng_eaf,Pig Iron Production,capacity,mtpy,1418206.915
+ng_eaf,Capacity Factor,capacity,%,100
+ng_eaf,Iron Ore,feed,mt ore / mt steel,0
+ng_eaf,Reformer Catalyst,feed,m3 catalyst/mt steel,0
+ng_eaf,Hydrogen,feed,mt H2 / mt steel,0
+ng_eaf,Natural Gas,feed,GJ-LHV NG / mt steel,2.148073333
+ng_eaf,Electricity,feed,MWh / mt steel,0.416997534
+ng_eaf,Carbon (Coke),feed,mt C / mt steel,0
+ng_eaf,Lime,feed,mt lime / mt steel,0
+ng_eaf,Raw Water Withdrawal,feed,mt H2O / mt steel,0.253171962
+ng_eaf,Carbon Dioxide (Methane as Fuel),emission,mt CO2 / mt steel,0
+ng_eaf,Carbon Dioxide (Carbon),emission,mt CO2 / mt steel,0
+ng_eaf,Slag,emission,mt slag / mt steel,0.174325548
+ng_eaf,Surface Water Discharge,emission,mt H2O discharged/mt H2O withdrawn,0.044644719
+ng_eaf,Steelmaking efficiency,efficiency,%,52.854
+ng_eaf,Reformer Furnace & Stack Air Blower,feed,kW / mtpy steel,0.000000001
+ng_eaf,Process Gas recycle,feed,kW / mtpy steel,0
+ng_eaf,DRI Scrubber Electricity,feed,kW / mtpy steel,0
+ng_eaf,Cooling Tower & Water Circulation Electricity,feed,kW / mtpy steel,0.000143424
+ng_eaf,Oxygen Supply Electricity,feed,kW / mtpy steel,0.002176694
+ng_eaf,Electric Arc Furnace Electricity,feed,kW / mtpy steel,0.040593161
+ng_eaf,Ladle Refining Electricity,feed,kW / mtpy steel,0.003143966
+ng_eaf,Miscellaneous Balance of Plant Electricity,feed,kW / mtpy steel,0

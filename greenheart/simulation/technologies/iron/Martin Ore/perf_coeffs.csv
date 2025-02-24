@@ -1,0 +1,29 @@
+,Product,Name,Type,Coeff,Unit,Northshore,United,Hibbing,Minorca,Tilden 
+0,std_taconite_pellets,Latitude,location,constant,deg N,47.29415278,47.34858889,47.53,47.55833333,46.48333333
+1,std_taconite_pellets,Longitude,location,constant,deg E,-91.25649444,-92.58361944,-92.91,-92.525,-87.66666667
+2,std_taconite_pellets,Crude ore processed,capacity,constant,wltpy,17000000.0,15000000.0,24000000.0,8600000.0,20500000.0
+3,std_taconite_pellets,Ore pellets produced,capacity,constant,wltpy,4540000.0,4600000.0,6300000.0,2790000.0,7700000.0
+4,std_taconite_pellets,Percent recovery,capacity,constant,wt %,26.70588235,30.66666667,26.25,32.44186047,37.56097561
+5,std_taconite_pellets,Estimated Reserves,capacity,constant,mlt,1158.0,774.6,109.0,109.7,520.0
+6,std_taconite_pellets,ROM Fe3O4 Content,minerology,constant,wt %,24.6,22.3,18.7,23.8,34.7
+7,std_taconite_pellets,Pellet Fe Content,chemistry,constant,wt %,65.0,65.27,66.1,62.66,61.0
+8,std_taconite_pellets,Pellet SiO2 Content,chemistry,constant,wt %,4.8,5.3,4.5,4.21,4.9
+9,std_taconite_pellets,Crusher Power,energy use,constant,kWh/LT pellet,9.79,8.35,7.7,9.09,8.38
+10,std_taconite_pellets,Concentrator Power,energy use,constant,kWh/LT pellet,72.68,65.92,107.89,67.63,51.011
+11,std_taconite_pellets,Pellet Plant Power,energy use,constant,kWh/LT pellet,40.88,32.95,47.45,49.51,21.09
+12,std_taconite_pellets,Size distribution min,size,constant,mm,9.5,9.5,9.5,9.5,9.5
+13,std_taconite_pellets,Size distribution min,size,constant,mm,12.5,12.5,12.5,12.5,12.5
+14,drg_taconite_pellets,Latitude,location,constant,deg N,47.29415278,47.34858889,47.53,47.55833333,46.48333333
+15,drg_taconite_pellets,Longitude,location,constant,deg E,-91.25649444,-92.58361944,-92.91,-92.525,-87.66666667
+16,drg_taconite_pellets,Crude ore processed,capacity,constant,wltpy,17000000.0,15000000.0,24000000.0,0.0,0.0
+17,drg_taconite_pellets,Ore pellets produced,capacity,constant,wltpy,4540000.0,4600000.0,6300000.0,0.0,0.0
+18,drg_taconite_pellets,Percent recovery,capacity,constant,wt %,26.70588235,30.66666667,26.25,0.0,0.0
+19,drg_taconite_pellets,Estimated Reserves,capacity,constant,mlt,1158.0,774.6,109.0,0.0,0.0
+20,drg_taconite_pellets,ROM Fe3O4 Content,minerology,constant,wt %,24.6,22.3,18.7,0.0,0.0
+21,drg_taconite_pellets,Pellet Fe Content,chemistry,constant,wt %,67.35,67.63,68.49,0.0,0.0
+22,drg_taconite_pellets,Pellet SiO2 Content,chemistry,constant,wt %,2.0,2.0,2.0,0.0,0.0
+23,drg_taconite_pellets,Crusher Power,energy use,constant,kWh/LT pellet,10.495,11.62986352,9.874412425,0.0,0.0
+24,drg_taconite_pellets,Concentrator Power,energy use,constant,kWh/LT pellet,72.68,65.92,107.89,0.0,0.0
+25,drg_taconite_pellets,Pellet Plant Power,energy use,constant,kWh/LT pellet,42.445,53.69362276,45.58892498,0.0,0.0
+26,drg_taconite_pellets,Size distribution min,size,constant,mm,9.5,9.5,9.5,0.0,0.0
+27,drg_taconite_pellets,Size distribution min,size,constant,mm,12.5,12.5,12.5,0.0,0.0

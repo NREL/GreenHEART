@@ -1,0 +1,27 @@
+Product,Name,Type,Unit,Northshore,United,Hibbing,Minorca,Tilden 
+std_taconite_pellets,Latitude,location,deg N,47.29415278,47.34858889,47.53,47.55833333,46.48333333
+std_taconite_pellets,Longitude,location,deg E,-91.25649444,-92.58361944,-92.91,-92.525,-87.66666667
+std_taconite_pellets,Crude ore processed,capacity,wltpy,17000000,15000000,24000000,8600000,20500000
+std_taconite_pellets,Ore pellets produced,capacity,wltpy,4540000,4600000,6300000,2790000,7700000
+std_taconite_pellets,Estimated Reserves,capacity,mlt,1158,774.6,109,109.7,520
+std_taconite_pellets,Buildings and other structures,capital,2021 $,802586723.3,782080397.9,1078561311,552238204.9,1340439971
+std_taconite_pellets,Mineral exploration and development,capital,2021 $,92838867.94,90466807.72,124762107.6,63879912.64,155054807
+std_taconite_pellets,Mineral land and rights,capital,2021 $,1041461.66,1014852.01,1399574.925,716601.5841,1739396.873
+std_taconite_pellets,Mining,variable opex,2021 $ per wlt pellet,16.875,15.49,19.87,16.84,15.3
+std_taconite_pellets,Processing,variable opex,2021 $ per wlt pellet,40.135,37.62,34.57,45.56,42.79
+std_taconite_pellets,Site administration,variable opex,2021 $ per wlt pellet,2.37,2.14,2.3,2.2,2.84
+std_taconite_pellets,New equipment purchases,variable opex,2021 $ per wlt pellet,4.2,4.46,4.54,5.63,4.65
+std_taconite_pellets,General/other,variable opex,2021 $ per wlt pellet,8.165,9.29,8.2,10.1,5.07
+drg_taconite_pellets,Latitude,location,deg N,47.29415278,47.34858889,47.53,47.55833333,46.48333333
+drg_taconite_pellets,Longitude,location,deg E,-91.25649444,-92.58361944,-92.91,-92.525,-87.66666667
+drg_taconite_pellets,Crude ore processed,capacity,wltpy,17000000,15000000,24000000,0,0
+drg_taconite_pellets,Ore pellets produced,capacity,wltpy,4540000,4600000,6300000,0,0
+drg_taconite_pellets,Estimated Reserves,capacity,mlt,1158,774.6,109,0,0
+drg_taconite_pellets,Buildings and other structures,capital,2021 $,1012588246,1118066189,949301480.9,0,0
+drg_taconite_pellets,Mineral exploration and development,capital,2021 $,117130702.2,129331817,109810033.3,0,0
+drg_taconite_pellets,Mineral land and rights,capital,2021 $,1313966.21,1450837.691,1231843.322,0,0
+drg_taconite_pellets,Mining,variable opex,2021 $ per wlt pellet,22.1175,26.60498583,22.58913891,0,0
+drg_taconite_pellets,Processing,variable opex,2021 $ per wlt pellet,43.8175,51.61628024,43.8251436,0,0
+drg_taconite_pellets,Site administration,variable opex,2021 $ per wlt pellet,4.515,5.521117114,4.687740946,0,0
+drg_taconite_pellets,New equipment purchases,variable opex,2021 $ per wlt pellet,4.2,4.46,4.54,0,0
+drg_taconite_pellets,General/other,variable opex,2021 $ per wlt pellet,15.8675,15.39868427,13.07435456,0,0

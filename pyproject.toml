@@ -19,6 +19,7 @@ dependencies = [
     "fastkml",
     "floris",
     "future",
+    "geopy",
     "global_land_mask",
     "hybridbosse",
     "lcoe",

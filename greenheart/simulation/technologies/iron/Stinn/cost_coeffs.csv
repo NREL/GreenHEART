@@ -1,0 +1,8 @@
+Name,Type,Coeff,Unit
+alpha_1_numerator,capital,51010.,-
+alpha_1_denominator,capital,-3.823e-3,-
+alpha_1_temp_offset,capital,631,-
+alpha_2_numerator,capital,5634000.,-
+alpha_2_denominator,capital,-7.813e-3,-
+alpha_2_temp_offset,capital,349,-
+alpha_3,capital,750000,-
